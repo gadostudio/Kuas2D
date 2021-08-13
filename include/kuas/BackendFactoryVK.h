@@ -140,16 +140,17 @@ namespace kuas
         VkInstance                      instance;
         VkPhysicalDevice                physicalDevice;
         VkDevice                        device;
-        VkQueue                         graphicsQueue;
         uint32_t                        graphicsQueueFamilyIndex;
+        VkQueue                         graphicsQueue;
         PFN_vkGetInstanceProcAddr       instanceProcAddrFn;
         PFN_vkGetDeviceProcAddr         deviceProcAddrFn;
         const VulkanFunctions*          functions;
     };
 
     extern Result createBackendDeviceVk(const VulkanDeviceCreateDesc& desc, Device** device);
-    extern Result createBackendImageVk(Device* device, ImageUsageFlags usage, Image** image);
-    
+    extern Result getBackendDeviceFnPtrsVk(Device* device, const VulkanFunctions& fnPtrs);
+
+    extern Result createBackendImageVk(Device* device, const ImageCreateDesc& desc, VkImage vkImage, VkImageView view, Image** image);
     extern void getBackendImageVk(
         Image* image,
         VkImageUsageFlags* outUsageFlags,
@@ -157,4 +158,5 @@ namespace kuas
         VkImage* outBackendImage);
 
     extern Result createBackendSemaphoreVk(Device* device, VkSemaphore backendSemaphore, bool managed);
+    extern VkSemaphore getBackendSemaphoreVk(Semaphore* semaphore);
 }

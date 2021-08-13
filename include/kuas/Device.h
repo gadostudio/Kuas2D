@@ -59,9 +59,20 @@ namespace kuas
         virtual void unmapBitmap() = 0;
 
         /**
-            Submit draw lists to the GPU.
+            Submits draw lists to the GPU.
          */
-        virtual Result submit(const SubmitDesc& submission, Fence* signalFence) = 0;
+        virtual Result enqueueWait(
+            uint32_t numWaitSemaphore,
+            Semaphore* const* waitSemaphores) = 0;
+
+        virtual Result enqueueDrawLists(
+            uint32_t numDrawLists,
+            DrawList* const* drawLists) = 0;
+
+        virtual Result enqueueSignal(
+            uint32_t numSignalSemaphore,
+            Semaphore* const* signalSemaphores,
+            Fence* signalFence = nullptr) = 0;
 
         virtual Result checkBitmapPixelFormatSupport(PixelFormat format, BitmapUsageFlags usage) = 0;
         virtual Result checkImagePixelFormatSupport(PixelFormat format, ImageUsageFlags usage) = 0;

@@ -21,6 +21,8 @@ namespace kuas
 
     ImageVK::~ImageVK()
     {
-        m_parentDevice->destroyImage(this);
+        if (m_allocation != nullptr) {
+            m_parentDevice->destroyImage(this);
+        }
     }
 }

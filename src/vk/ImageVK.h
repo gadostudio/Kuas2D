@@ -32,7 +32,7 @@ namespace kuas
         VkImageView m_imageView;
         VmaAllocation m_allocation;
         DeviceVK* m_parentDevice;
-
+        
         uint32_t m_width;
         uint32_t m_height;
         PixelFormat m_format;

@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(kuas)
+
+add_subdirectory(extern)
+
 set(KUAS_VULKAN_BACKEND_SRC
     "src/vk/DeviceVK.cpp"
     "src/vk/DeviceVK.h"
@@ -44,5 +50,8 @@ add_library(kuas STATIC ${KUAS_SRC})
 target_link_libraries(kuas PUBLIC Vulkan-Headers spdlog::spdlog)
 target_include_directories(
     kuas
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>)
+
+add_subdirectory(tools/ks_app)
+add_subdirectory(examples)

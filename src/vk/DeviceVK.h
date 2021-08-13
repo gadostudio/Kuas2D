@@ -3,8 +3,10 @@
 #include "VulkanHeaders.h"
 #include <kuas/BackendFactoryVK.h>
 #include <array>
+#include <queue>
 
 #include "ImageVK.h"
+#include "../util/StaticQueue.h"
 #include "../shaders/ShaderModuleID.h"
 
 namespace kuas
@@ -38,7 +40,18 @@ namespace kuas
         void mapBitmap() override;
         void unmapBitmap() override;
 
-        Result submit(const SubmitDesc& submission, Fence* signalFence) override;
+        Result enqueueWait(
+            uint32_t numWaitSemaphore,
+            Semaphore* const* waitSemaphores) override;
+
+        Result enqueueDrawLists(
+            uint32_t numDrawLists,
+            DrawList* const* drawLists) override;
+
+        Result enqueueSignal(
+            uint32_t numSignalSemaphore,
+            Semaphore* const* signalSemaphores,
+            Fence* signalFence) override;
 
         Result checkBitmapPixelFormatSupport(PixelFormat format, BitmapUsageFlags usage) override;
         Result checkImagePixelFormatSupport(PixelFormat format, ImageUsageFlags usage) override;
@@ -53,15 +66,18 @@ namespace kuas
         VkShaderModule getShaderModule(uint32_t id) { return m_shaderModules[id]; }
 
     private:
-        VkInstance          m_instance;
-        VkPhysicalDevice    m_physicalDevice;
-        VkDevice            m_device;
-        VkQueue             m_graphicsQueue;
-        uint32_t            m_graphicsQueueFamily;
-        VulkanFunctions     m_fn;
-        VmaAllocator        m_allocator;
-        VkPipelineCache     m_pipelineCache;
-        VkPipelineLayout    m_commonPipelineLayout;
+        VkInstance                          m_instance;
+        VkPhysicalDevice                    m_physicalDevice;
+        VkDevice                            m_device;
+        VkQueue                             m_graphicsQueue;
+        uint32_t                            m_graphicsQueueFamily;
+        VulkanFunctions                     m_fn;
+        VmaAllocator                        m_allocator;
+        VkPipelineCache                     m_pipelineCache;
+        VkPipelineLayout                    m_commonPipelineLayout;
+
+        StaticQueue<VkSemaphore, 64>        m_waitQueue;
+        StaticQueue<VkCommandBuffer, 64>    m_cmdBufferQueue;
 
         std::array<VkShaderModule, g_numShaderModules> m_shaderModules;
 

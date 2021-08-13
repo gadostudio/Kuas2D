@@ -13,6 +13,8 @@ namespace kuas
         SemaphoreVK(VkSemaphore semaphore, DeviceVK* parentDevice);
         ~SemaphoreVK();
         
+        VkSemaphore getHandle() { return m_semaphore; }
+
         friend class DeviceVK;
 
     private:

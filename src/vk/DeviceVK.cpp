@@ -24,9 +24,14 @@
 #include "../shaders/FillRectAA_GS.h"
 #include "../shaders/FillRectAA_FS.h"
 
+#include <algorithm>
+
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 26812)
 #pragma warning(disable : 6255)
+#endif // _MSC_VER
+
 namespace kuas
 {
     DeviceVK::DeviceVK(const VulkanDeviceCreateDesc& desc) :
@@ -43,6 +48,10 @@ namespace kuas
         }
         else {
             initFunctions(*desc.functions);
+        }
+
+        if (m_graphicsQueue == nullptr) {
+            m_fn.vkGetDeviceQueue(m_device, m_graphicsQueueFamily, 0, &m_graphicsQueue);
         }
 
         initVma();
@@ -333,53 +342,86 @@ namespace kuas
     {
     }
 
-    Result DeviceVK::submit(const SubmitDesc& submission, Fence* signalFence)
+    Result DeviceVK::enqueueWait(uint32_t numWaitSemaphore, Semaphore* const* waitSemaphores)
     {
-        VkSemaphore* waitSemaphores =
-            (VkSemaphore*)alloca(submission.numWaitSemaphores * sizeof(VkSemaphore));
+        for (uint32_t i = 0; i < numWaitSemaphore; i++) {
+            VkSemaphore semaphore = KUAS_PTR_CAST(SemaphoreVK, waitSemaphores[i])->m_semaphore;
+            if (!m_waitQueue.push(semaphore)) {
+                VkSemaphore* queued = m_waitQueue.getData();
+                VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * 64);
+
+                std::fill_n(waitStageDest, 64, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
+                VkSubmitInfo submit{};
+                submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+                submit.waitSemaphoreCount = 64;
+                submit.pWaitSemaphores = queued;
+                submit.pWaitDstStageMask = waitStageDest;
+
+                m_fn.vkQueueSubmit(m_graphicsQueue, 1, &submit, nullptr);
+
+                m_waitQueue.flush();
+                m_waitQueue.push(semaphore);
+            }
+        }
+        return Result::Ok;
+    }
+
+    Result DeviceVK::enqueueDrawLists(
+        uint32_t numDrawLists,
+        DrawList* const* drawLists)
+    {
+        for (uint32_t i = 0; i < numDrawLists; i++) {
+            VkCommandBuffer cmdBuffer = KUAS_PTR_CAST(DrawListVK, drawLists[i])->m_cmdBuffer;
+            if (!m_cmdBufferQueue.push(cmdBuffer)) {
+                VkCommandBuffer* queued = m_cmdBufferQueue.getData();
+
+                VkSubmitInfo submit{};
+                submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+                submit.commandBufferCount = 64;
+                submit.pCommandBuffers = queued;
+
+                m_fn.vkQueueSubmit(m_graphicsQueue, 1, &submit, nullptr);
+
+                m_cmdBufferQueue.flush();
+                m_cmdBufferQueue.push(cmdBuffer);
+            }
+        }
+        return Result::Ok;
+    }
+
+    Result DeviceVK::enqueueSignal(uint32_t numSignalSemaphores, Semaphore* const* signalSemaphores, Fence* signalFence)
+    {
+        VkSemaphore* semaphores = (VkSemaphore*)alloca(sizeof(VkSemaphore) * numSignalSemaphores);
+        VkFence fence = nullptr;
+
+        if (signalFence != nullptr) {
+            fence = KUAS_PTR_CAST(FenceVK, signalFence)->m_fence;
+        }
+
+        for (uint32_t i = 0; i < numSignalSemaphores; i++) {
+            semaphores[i] = KUAS_PTR_CAST(SemaphoreVK, signalSemaphores[i])->m_semaphore;
+        }
+
+        uint32_t numWaitSemaphores = (uint32_t)m_waitQueue.getWritePos();
+        uint32_t numCmdBuffers = (uint32_t)m_cmdBufferQueue.getWritePos();
+        VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * numWaitSemaphores);
+
+        std::fill_n(waitStageDest, numWaitSemaphores, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
+        VkSubmitInfo submit{};
+        submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit.waitSemaphoreCount = numWaitSemaphores;
+        submit.pWaitSemaphores = m_waitQueue.getData();
+        submit.pWaitDstStageMask = waitStageDest;
+        submit.commandBufferCount = numCmdBuffers;
+        submit.pCommandBuffers = m_cmdBufferQueue.getData();
+        submit.signalSemaphoreCount = numSignalSemaphores;
+        submit.pSignalSemaphores = semaphores;
         
-        VkCommandBuffer* cmdBuffers =
-            (VkCommandBuffer*)alloca(submission.numDrawLists * sizeof(VkCommandBuffer));
-        
-        VkSemaphore* signalSemaphores =
-            (VkSemaphore*)alloca(submission.numSignalSemaphores * sizeof(VkSemaphore));
-
-        VkPipelineStageFlags* waitDstPipelineStages = 
-            (VkPipelineStageFlags*)alloca(submission.numWaitSemaphores * sizeof(VkPipelineStageFlags));
-        
-        for (uint32_t i = 0; i < submission.numWaitSemaphores; i++) {
-            waitSemaphores[i] = KUAS_PTR_CAST(SemaphoreVK, submission.waitSemaphores[i])->m_semaphore;
-            waitDstPipelineStages[i] = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        }
-
-        for (uint32_t i = 0; i < submission.numDrawLists; i++) {
-            cmdBuffers[i] = KUAS_PTR_CAST(DrawListVK, submission.drawLists[i])->m_cmdBuffer;
-        }
-
-        for (uint32_t i = 0; i < submission.numSignalSemaphores; i++) {
-            signalSemaphores[i] = KUAS_PTR_CAST(SemaphoreVK, submission.signalSemaphores[i])->m_semaphore;
-        }
-
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = submission.numWaitSemaphores;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitDstPipelineStages;
-        submitInfo.commandBufferCount = submission.numDrawLists;
-        submitInfo.pCommandBuffers = cmdBuffers;
-        submitInfo.signalSemaphoreCount = submission.numSignalSemaphores;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-        VkResult result = m_fn.vkQueueSubmit(
-            m_graphicsQueue, 1, &submitInfo, KUAS_PTR_CAST(FenceVK, signalFence)->m_fence);
-
-        switch (result) {
-            case VK_ERROR_DEVICE_LOST:
-                return Result::ErrDeviceLost;
-            case VK_ERROR_OUT_OF_HOST_MEMORY:
-            case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-                return Result::ErrOutOfMemory;
-        }
+        m_waitQueue.flush();
+        m_cmdBufferQueue.flush();
+        m_fn.vkQueueSubmit(m_graphicsQueue, 1, &submit, fence);
 
         return Result::Ok;
     }
@@ -771,4 +813,7 @@ namespace kuas
             createShaderModule(sizeof(ShaderFillRectAA_FS), ShaderFillRectAA_FS);
     }
 }
+
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif // _MSC_VER

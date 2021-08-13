@@ -5,6 +5,7 @@
 #include "math/CommonMath.h"
 #include "math/Mat3.h"
 #include "math/Vec2.h"
+#include "DebugAssert.h"
 
 #define KUAS_ARRAY_SIZE(x) \
     (sizeof(x)/sizeof(x[0]))
@@ -233,3 +234,6 @@ namespace kuas
         Semaphore* const* signalSemaphores;
     };
 }
+
+#define KUAS_FAILED(x) \
+    ((x) != kuas::Result::Ok)

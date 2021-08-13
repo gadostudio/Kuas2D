@@ -67,6 +67,11 @@ namespace kuas
         {
         }
 
+        Ref(std::nullptr_t) :
+            m_ptr(nullptr)
+        {
+        }
+
         explicit Ref(T* ptr) :
             m_ptr(ptr)
         {
@@ -86,12 +91,11 @@ namespace kuas
         ~Ref()
         {
             safeRelease(m_ptr);
-            m_ptr = nullptr;
         }
 
         Ref<T>& operator=(const Ref<T>& other)
         {
-            if (&other != this) {
+            if (m_ptr != other.m_ptr) {
                 reset(safeAddRef(other.m_ptr));
             }
 
@@ -156,6 +160,42 @@ namespace kuas
     private:
         T* m_ptr;
     };
+
+    template<class T>
+    bool operator==(const kuas::Ref<T>& a, const kuas::Ref<T>& b)
+    {
+        return a.get() == b.get();
+    }
+
+    template<class T>
+    bool operator==(const kuas::Ref<T>& a, std::nullptr_t)
+    {
+        return a == kuas::Ref<T>(nullptr);
+    }
+
+    template<class T>
+    bool operator==(std::nullptr_t, const kuas::Ref<T>& b)
+    {
+        return b == nullptr;
+    }
+
+    template<class T>
+    bool operator!=(const kuas::Ref<T>& a, const kuas::Ref<T>& b)
+    {
+        return !(a == b);
+    }
+
+    template<class T>
+    bool operator!=(const kuas::Ref<T>& a, std::nullptr_t)
+    {
+        return !(a == nullptr);
+    }
+
+    template<class T>
+    bool operator!=(std::nullptr_t, const kuas::Ref<T>& b)
+    {
+        return !(nullptr == b);
+    }
 }
 
 #define KUAS_PTR_CAST(type, v) \
