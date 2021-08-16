@@ -18,7 +18,9 @@ namespace kuas
             DeviceVK* device);
 
         VkPipeline buildRect();
+        VkPipeline buildRoundedRect();
         VkPipeline buildFillRect();
+        VkPipeline buildFillRoundedRect();
         VkPipeline buildFillCircle();
 
     private:

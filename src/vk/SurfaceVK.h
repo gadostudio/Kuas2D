@@ -55,9 +55,6 @@ namespace kuas
         DeviceVK* m_parentDevice;
 
         void init(VkSwapchainKHR swapchain);
-        void initFacadeImages();
-        Result resizeInternal();
         void destroySwapchainObjects();
-        void recordPassThruCB(uint32_t n, bool resizing);
     };
 }

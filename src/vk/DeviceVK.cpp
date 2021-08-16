@@ -11,19 +11,6 @@
 #include "DrawParamVK.h"
 #include "PipelineBuilderVK.h"
 
-#include "../shaders/BasicPolyFillNoAA_VS.h"
-#include "../shaders/BasicPolyFillNoAA_FS.h"
-#include "../shaders/Rect_VS.h"
-#include "../shaders/Rect_GS.h"
-#include "../shaders/Rect_FS.h"
-#include "../shaders/RectAA_GS.h"
-#include "../shaders/RectAA_FS.h"
-#include "../shaders/FillRect_VS.h"
-#include "../shaders/FillRect_GS.h"
-#include "../shaders/FillRect_FS.h"
-#include "../shaders/FillRectAA_GS.h"
-#include "../shaders/FillRectAA_FS.h"
-
 #include <algorithm>
 
 #ifdef KUAS_USE_SDL
@@ -225,13 +212,19 @@ namespace kuas
         PipelineBuilderVK builder(
             desc, KUAS_PTR_CAST(DrawPassVK, drawPass)->getHandle(), m_pipelineCache, this);
 
+        VkPipeline rect = builder.buildRect();
+        KUAS_ASSERT(rect != nullptr && "Failed to create graphics pipeline");
+        
+        VkPipeline roundedRect = builder.buildRoundedRect();
+        KUAS_ASSERT(roundedRect != nullptr && "Failed to create graphics pipeline");
+
         VkPipeline fillRect = builder.buildFillRect();
         KUAS_ASSERT(fillRect != nullptr && "Failed to create graphics pipeline");
 
-        VkPipeline rect = builder.buildRect();
-        KUAS_ASSERT(rect != nullptr && "Failed to create graphics pipeline");
+        VkPipeline fillRoundedRect = builder.buildFillRoundedRect();
+        KUAS_ASSERT(fillRoundedRect != nullptr && "Failed to create graphics pipeline");
 
-        *renderState = new RenderStateVK(rect, fillRect, nullptr, nullptr, ColorStateDesc{}, this);
+        *renderState = new RenderStateVK(rect, roundedRect, fillRect, fillRoundedRect, nullptr, ColorStateDesc{}, this);
 
         return Result::Ok;
     }
@@ -902,6 +895,29 @@ namespace kuas
         return mod;
     }
 
+#include "../shaders/BasicPolyFillNoAA_VS.h"
+#include "../shaders/BasicPolyFillNoAA_FS.h"
+#include "../shaders/Rect_VS.h"
+#include "../shaders/Rect_GS.h"
+#include "../shaders/Rect_FS.h"
+#include "../shaders/RectAA_GS.h"
+#include "../shaders/RectAA_FS.h"
+#include "../shaders/RoundedRect_VS.h"
+#include "../shaders/RoundedRect_GS.h"
+#include "../shaders/RoundedRect_FS.h"
+#include "../shaders/RoundedRectAA_GS.h"
+#include "../shaders/RoundedRectAA_FS.h"
+#include "../shaders/FillRect_VS.h"
+#include "../shaders/FillRect_GS.h"
+#include "../shaders/FillRect_FS.h"
+#include "../shaders/FillRectAA_GS.h"
+#include "../shaders/FillRectAA_FS.h"
+#include "../shaders/FillRoundedRect_VS.h"
+#include "../shaders/FillRoundedRect_GS.h"
+#include "../shaders/FillRoundedRect_FS.h"
+#include "../shaders/FillRoundedRectAA_GS.h"
+#include "../shaders/FillRoundedRectAA_FS.h"
+
     void DeviceVK::initShaderModule()
     {
         m_shaderModules[ShaderModuleID::BasicPolyFillNoAA_VS] =
@@ -925,6 +941,21 @@ namespace kuas
         m_shaderModules[ShaderModuleID::RectAA_PS] =
             createShaderModule(sizeof(ShaderRectAA_FS), ShaderRectAA_FS);
 
+        m_shaderModules[ShaderModuleID::RoundedRect_VS] =
+            createShaderModule(sizeof(ShaderRoundedRect_VS), ShaderRoundedRect_VS);
+
+        m_shaderModules[ShaderModuleID::RoundedRect_GS] =
+            createShaderModule(sizeof(ShaderRoundedRect_GS), ShaderRoundedRect_GS);
+
+        m_shaderModules[ShaderModuleID::RoundedRect_PS] =
+            createShaderModule(sizeof(ShaderRoundedRect_FS), ShaderRoundedRect_FS);
+
+        m_shaderModules[ShaderModuleID::RoundedRectAA_GS] =
+            createShaderModule(sizeof(ShaderRoundedRectAA_GS), ShaderRoundedRectAA_GS);
+
+        m_shaderModules[ShaderModuleID::RoundedRectAA_PS] =
+            createShaderModule(sizeof(ShaderRoundedRectAA_FS), ShaderRoundedRectAA_FS);
+
         m_shaderModules[ShaderModuleID::FillRect_VS] =
             createShaderModule(sizeof(ShaderFillRect_VS), ShaderFillRect_VS);
 
@@ -939,6 +970,21 @@ namespace kuas
 
         m_shaderModules[ShaderModuleID::FillRectAA_PS] =
             createShaderModule(sizeof(ShaderFillRectAA_FS), ShaderFillRectAA_FS);
+
+        m_shaderModules[ShaderModuleID::FillRoundedRect_VS] =
+            createShaderModule(sizeof(ShaderFillRoundedRect_VS), ShaderFillRoundedRect_VS);
+
+        m_shaderModules[ShaderModuleID::FillRoundedRect_GS] =
+            createShaderModule(sizeof(ShaderFillRoundedRect_GS), ShaderFillRoundedRect_GS);
+
+        m_shaderModules[ShaderModuleID::FillRoundedRect_PS] =
+            createShaderModule(sizeof(ShaderFillRoundedRect_FS), ShaderFillRoundedRect_FS);
+
+        m_shaderModules[ShaderModuleID::FillRoundedRectAA_GS] =
+            createShaderModule(sizeof(ShaderFillRoundedRectAA_GS), ShaderFillRoundedRectAA_GS);
+
+        m_shaderModules[ShaderModuleID::FillRoundedRectAA_PS] =
+            createShaderModule(sizeof(ShaderFillRoundedRectAA_FS), ShaderFillRoundedRectAA_FS);
     }
 
 #ifdef KUAS_USE_SDL

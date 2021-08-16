@@ -96,7 +96,7 @@ namespace kuas
             VkImageView imageView;
             VmaAllocation allocation = VK_NULL_HANDLE;
 
-            // We don't use createImage() because we need to resize the image memory when needed and avoid memory allocation.
+            // We don't use createImage() because we need to resize the image memory when needed and avoid memory reallocation.
             VkResult result = m_fn.vkCreateImage(device, &imgInfo, nullptr, &image);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
@@ -186,12 +186,11 @@ namespace kuas
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        
+
         m_fn.vkBeginCommandBuffer(cb, &beginInfo);
         {
             VkImage srcImage = m_images[m_currentBackBuffer]->m_image;
             VkImage dstImage = m_surfaceImages[m_currentBackBuffer];
-            VkImageMemoryBarrier barrier[2]{};
 
             vulkanImageMemoryBarrier(
                 m_fn, cb, srcImage,
@@ -343,19 +342,6 @@ namespace kuas
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        m_fn.vkResetCommandPool(device, m_cmdPool, 0);
-
-        for (uint32_t i = 0; i < m_numImages; i++) {
-            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_imageAcquiredSemaphores[i]);
-            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
-
-            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_queueFinishedSemaphores[i]);
-            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
-
-            result = m_fn.vkCreateFence(device, &fenceInfo, nullptr, &m_frameFences[i]);
-            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
-        }
-
         if (m_width == 0 && m_height == 0) {
             resize(surfCaps.maxImageExtent.width, surfCaps.maxImageExtent.height);
 
@@ -371,15 +357,17 @@ namespace kuas
 
         m_surfaceWidth = surfCaps.maxImageExtent.width;
         m_surfaceHeight = surfCaps.maxImageExtent.height;
-    }
 
-    void SurfaceVK::initFacadeImages()
-    {
-    }
+        for (uint32_t i = 0; i < m_numImages; i++) {
+            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_imageAcquiredSemaphores[i]);
+            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
-    Result SurfaceVK::resizeInternal()
-    {
-        return Result();
+            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_queueFinishedSemaphores[i]);
+            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
+
+            result = m_fn.vkCreateFence(device, &fenceInfo, nullptr, &m_frameFences[i]);
+            KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
+        }
     }
 
     void SurfaceVK::destroySwapchainObjects()
@@ -391,16 +379,5 @@ namespace kuas
             m_fn.vkDestroySemaphore(device, m_queueFinishedSemaphores[i], nullptr);
             m_fn.vkDestroyFence(device, m_frameFences[i], nullptr);
         }
-    }
-
-    void SurfaceVK::recordPassThruCB(uint32_t n, bool resizing)
-    {
-        VkCommandBuffer current = m_cmdBuffers[n];
-        VkCommandBufferBeginInfo beginInfo{};
-
-        m_fn.vkBeginCommandBuffer(current, &beginInfo);
-        if (resizing) {
-        }
-        m_fn.vkEndCommandBuffer(current);
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App.h"
+#include <chrono>
 
 namespace ks_app
 {

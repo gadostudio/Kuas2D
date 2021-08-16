@@ -15,8 +15,9 @@ namespace kuas
     public:
         RenderStateVK(
             VkPipeline rectPipe,
+            VkPipeline roundedRectPipe,
             VkPipeline fillRectPipe,
-            VkPipeline fillRoundRectPipe,
+            VkPipeline fillRoundedRectPipe,
             VkPipeline fillCirclePipe,
             const ColorStateDesc& colorState,
             DeviceVK* parentDevice);

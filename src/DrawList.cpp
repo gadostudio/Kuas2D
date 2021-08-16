@@ -102,8 +102,22 @@ namespace kuas
     }
 
     void DrawList::drawRoundedRect(const Rect2F& rect, float roundness)
-    {    
-    }    
+    {
+        flushCommands(PipelineID::RoundedRect);
+
+        RoundedRectVertex* vtx = reinterpret_cast<RoundedRectVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+        vtx->posMin.x = rect.x;
+        vtx->posMin.y = rect.y;
+        vtx->posMax.x = rect.x + rect.width;
+        vtx->posMax.y = rect.y + rect.height;
+        vtx->col = m_lineColor;
+        vtx->thickness = m_lineThickness;
+        vtx->roundness = roundness;
+
+        m_vtxCurrentWriteOffset += sizeof(RoundedRectVertex);
+        m_vtxDrawSize += sizeof(RoundedRectVertex);
+        m_vtxDrawCount++;
+    }
 
     void DrawList::drawTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)
     {    
@@ -137,6 +151,18 @@ namespace kuas
     void DrawList::fillRoundedRect(const Rect2F& rect, float roundness)
     {
         flushCommands(PipelineID::FillRoundedRect);
+
+        FillRoundedRectVertex* vtx = reinterpret_cast<FillRoundedRectVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+        vtx->posMin.x = rect.x;
+        vtx->posMin.y = rect.y;
+        vtx->posMax.x = rect.x + rect.width;
+        vtx->posMax.y = rect.y + rect.height;
+        vtx->col = m_fillColor;
+        vtx->roundness = roundness;
+
+        m_vtxCurrentWriteOffset += sizeof(FillRoundedRectVertex);
+        m_vtxDrawSize += sizeof(FillRoundedRectVertex);
+        m_vtxDrawCount++;
     }
 
     void DrawList::fillTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)

@@ -17,6 +17,12 @@ namespace kuas
         static const VkVertexInputAttributeDescription attributes[3];
     };
 
+    struct RoundedRectVertexVK : public RoundedRectVertex
+    {
+        static const VkVertexInputBindingDescription bindings[1];
+        static const VkVertexInputAttributeDescription attributes[4];
+    };
+
     struct FillRectVertexVK : public FillRectVertex
     {
         static const VkVertexInputBindingDescription bindings[1];

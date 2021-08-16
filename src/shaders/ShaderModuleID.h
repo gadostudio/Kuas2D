@@ -15,11 +15,23 @@ namespace kuas
             RectAA_GS,
             RectAA_PS,
 
+            RoundedRect_VS,
+            RoundedRect_GS,
+            RoundedRect_PS,
+            RoundedRectAA_GS,
+            RoundedRectAA_PS,
+
             FillRect_VS,
             FillRect_GS,
             FillRect_PS,
             FillRectAA_GS,
             FillRectAA_PS,
+
+            FillRoundedRect_VS,
+            FillRoundedRect_GS,
+            FillRoundedRect_PS,
+            FillRoundedRectAA_GS,
+            FillRoundedRectAA_PS,
 
             Circle_VS,
             Circle_GS,

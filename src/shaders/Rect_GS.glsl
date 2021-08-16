@@ -1,5 +1,9 @@
 #version 450 core
 
+#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE) || defined(KUAS_ROUNDED_SHAPE)
+#define KUAS_USE_SDF
+#endif
+
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
@@ -15,7 +19,7 @@ layout(location = 2) in float vs_roundness[];
 
 // to fragment shader
 layout(location = 0) out vec4 fs_col;
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
 layout(location = 1) out vec2 fs_size;
 layout(location = 2) out vec2 fs_pos;
 #endif
@@ -36,7 +40,7 @@ void main()
 {
     vec2 a = gl_in[0].gl_Position.xy;
     vec2 b = gl_in[0].gl_Position.zw;
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
     // preserve pixel for AA parts
     vec2 size = b - a;
     vec2 halfSize = size * 0.5;
@@ -56,7 +60,7 @@ void main()
     vec3 e3 = transform * vec3(b, 1.0);
 
     fs_col = vs_col[0];
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
     fs_size = halfSize;
     fs_pos = vec2(-1.0);
 #endif
@@ -71,7 +75,7 @@ void main()
     EmitVertex();
 
     fs_col = vs_col[0];
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
     fs_size = halfSize;
     fs_pos = vec2(size.x + 1.0, -1.0);
 #endif
@@ -86,7 +90,7 @@ void main()
     EmitVertex();
 
     fs_col = vs_col[0];
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
     fs_size = halfSize;
     fs_pos = vec2(-1.0, size.y + 1.0);
 #endif
@@ -101,7 +105,7 @@ void main()
     EmitVertex();
 
     fs_col = vs_col[0];
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE)
+#ifdef KUAS_USE_SDF
     fs_size = halfSize;
     fs_pos = size + 1.0;
 #endif
