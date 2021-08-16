@@ -11,6 +11,10 @@ namespace kuas
         PFN_vkGetPhysicalDeviceProperties               vkGetPhysicalDeviceProperties;
         PFN_vkGetPhysicalDeviceMemoryProperties         vkGetPhysicalDeviceMemoryProperties;
         PFN_vkGetPhysicalDeviceImageFormatProperties    vkGetPhysicalDeviceImageFormatProperties;
+        PFN_vkDestroySurfaceKHR                         vkDestroySurfaceKHR;
+        PFN_vkGetPhysicalDeviceSurfaceSupportKHR        vkGetPhysicalDeviceSurfaceSupportKHR;
+        PFN_vkGetPhysicalDeviceSurfaceFormatsKHR        vkGetPhysicalDeviceSurfaceFormatsKHR;
+        PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR   vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
 
         // device functions
         PFN_vkAllocateCommandBuffers            vkAllocateCommandBuffers;
@@ -133,6 +137,11 @@ namespace kuas
         PFN_vkUnmapMemory                       vkUnmapMemory;
         PFN_vkUpdateDescriptorSets              vkUpdateDescriptorSets;
         PFN_vkWaitForFences                     vkWaitForFences;
+        PFN_vkCreateSwapchainKHR                vkCreateSwapchainKHR;
+        PFN_vkDestroySwapchainKHR               vkDestroySwapchainKHR;
+        PFN_vkGetSwapchainImagesKHR             vkGetSwapchainImagesKHR;
+        PFN_vkAcquireNextImageKHR               vkAcquireNextImageKHR;
+        PFN_vkQueuePresentKHR                   vkQueuePresentKHR;
     };
 
     struct VulkanDeviceCreateDesc

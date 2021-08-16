@@ -51,11 +51,6 @@ namespace kuas
         vmaUnmapMemory(m_allocator, allocations[0]);
         vmaUnmapMemory(m_allocator, allocations[1]);
 
-        VkCommandBuffer cmdBuffer = m_cmdBuffer;
-        VkCommandBufferBeginInfo cmdBegin{};
-        cmdBegin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        cmdBegin.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
         VkPipeline currentPipeline = VK_NULL_HANDLE;
         VkPipelineLayout layout = m_parentDevice->getCommonPipelineLayout();
         static const VkShaderStageFlags pushConstantStages =
@@ -67,6 +62,11 @@ namespace kuas
         // conveniently. Unfortunately, extra data must be stored and a loop required to
         // iterate & translate draw commands into actual Vulkan commands.
         
+        VkCommandBuffer cmdBuffer = m_cmdBuffer;
+        VkCommandBufferBeginInfo cmdBegin{};
+        cmdBegin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        cmdBegin.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
         m_fn.vkBeginCommandBuffer(cmdBuffer, &cmdBegin);
         m_fn.vkCmdBindIndexBuffer(cmdBuffer, m_idxBuffer, 0, VK_INDEX_TYPE_UINT32);
 

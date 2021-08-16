@@ -24,8 +24,10 @@ namespace kuas
         PixelFormat getFormat() const override { return m_format; }
         VkImage getImage() { return m_image; }
         VkImageView getImageView() { return m_imageView; }
+        VmaAllocation getAllocation() { return m_allocation; }
 
         friend class DeviceVK;
+        friend class SurfaceVK;
 
     private:
         VkImage m_image;

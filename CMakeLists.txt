@@ -23,6 +23,8 @@ set(KUAS_VULKAN_BACKEND_SRC
     "src/vk/RenderTargetVK.h"
     "src/vk/SemaphoreVK.cpp"
     "src/vk/SemaphoreVK.h"
+    "src/vk/SurfaceVK.cpp"
+    "src/vk/SurfaceVK.h"
     "src/vk/VertexAttributeTypesVK.cpp"
     "src/vk/VertexAttributeTypesVK.h"
     "src/vk/VmaStub.cpp"
@@ -47,7 +49,7 @@ set(KUAS_SRC
     ${KUAS_VULKAN_BACKEND_SRC})
 
 add_library(kuas STATIC ${KUAS_SRC})
-target_link_libraries(kuas PUBLIC Vulkan-Headers spdlog::spdlog)
+target_link_libraries(kuas PUBLIC Vulkan-Headers spdlog::spdlog SDL2::SDL2-static)
 target_include_directories(
     kuas
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

@@ -44,9 +44,9 @@ namespace kuas
         m_insideDrawPass = true;
     }
 
-    void DrawList::setRenderState(Ref<RenderState>& renderState)
+    void DrawList::setRenderState(RenderState* renderState)
     {
-        m_currentRenderState = renderState.get();
+        m_currentRenderState = renderState;
     }
 
     void DrawList::setViewport(const ViewportDesc& viewport)
@@ -137,8 +137,6 @@ namespace kuas
     void DrawList::fillRoundedRect(const Rect2F& rect, float roundness)
     {
         flushCommands(PipelineID::FillRoundedRect);
-
-        m_idxDrawCount += 6;
     }
 
     void DrawList::fillTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)

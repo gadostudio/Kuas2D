@@ -5,6 +5,7 @@
 #include "math/CommonMath.h"
 #include "math/Mat3.h"
 #include "math/Vec2.h"
+#include "PlatformSupport.h"
 #include "DebugAssert.h"
 
 #define KUAS_ARRAY_SIZE(x) \
@@ -140,6 +141,12 @@ namespace kuas
         Unsignaled
     };
 
+    enum class SurfaceType
+    {
+        SDL,
+        Win32
+    };
+
     template<typename T>
     struct Rect2
     {
@@ -224,14 +231,16 @@ namespace kuas
         const RasterizationStateDesc*    rasterizationState;
     };
 
-    struct SubmitDesc
+    struct SurfaceCreateDesc
     {
-        uint32_t numWaitSemaphores;
-        Semaphore* const* waitSemaphores;
-        uint32_t numDrawLists;
-        DrawList* const* drawLists;
-        uint32_t numSignalSemaphores;
-        Semaphore* const* signalSemaphores;
+        SurfaceType     type;
+        PixelFormat     format;
+        uint32_t        numSwapBuffer;
+        uint32_t        width;
+        uint32_t        height;
+        ImageUsageFlags usage;
+        void*           data0;
+        void*           data1;
     };
 }
 

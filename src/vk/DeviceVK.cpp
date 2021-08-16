@@ -26,6 +26,11 @@
 
 #include <algorithm>
 
+#ifdef KUAS_USE_SDL
+#include <SDL.h>
+#include <SDL_vulkan.h>
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 26812)
@@ -119,27 +124,7 @@ namespace kuas
         imageInfo.arrayLayers = 1;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-
-        if ((desc.usage & ImageUsage::Drawing) == ImageUsage::Drawing) {
-            imageInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-        }
-
-        if ((desc.usage & ImageUsage::RenderTargetOutput) == ImageUsage::RenderTargetOutput) {
-            imageInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        }
-
-        if ((desc.usage & ImageUsage::RenderTargetInput) == ImageUsage::RenderTargetInput) {
-            imageInfo.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
-        }
-
-        if ((desc.usage & ImageUsage::TransferSrc) == ImageUsage::TransferSrc) {
-            imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        }
-
-        if ((desc.usage & ImageUsage::TransferDst) == ImageUsage::TransferDst) {
-            imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-        }
-
+        imageInfo.usage = convertImageUsageVk(desc.usage);
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         VmaAllocationCreateInfo allocInfo{};
@@ -334,6 +319,105 @@ namespace kuas
         return Result::Ok;
     }
 
+    Result DeviceVK::createSurface(const SurfaceCreateDesc& desc, Surface** surface)
+    {
+        VkSurfaceKHR vksurface;
+        bool ret;
+
+        if (desc.numSwapBuffer > 4) {
+            return Result::ErrInvalidArg;
+        }
+
+        switch (desc.type) {
+#ifdef KUAS_USE_SDL
+            case SurfaceType::SDL:
+                ret = createSurfaceSDL(desc, &vksurface);
+                break;
+#endif
+#ifdef KUAS_PLATFORM_WINDOWS
+            case SurfaceType::Win32:
+                ret = createSurfaceWin32(desc, &vksurface);
+                break;
+#endif
+            default:
+                return Result::ErrInvalidArg;
+        }
+
+        if (!ret) {
+            return Result::ErrUnknown;
+        }
+
+        VkBool32 surfaceSupport;
+        m_fn.vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, m_graphicsQueueFamily, vksurface, &surfaceSupport);
+        KUAS_ASSERT(surfaceSupport == VK_TRUE);
+
+        VkSurfaceCapabilitiesKHR surfCaps;
+        m_fn.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, vksurface, &surfCaps);
+
+        uint32_t numFormats;
+        std::vector<VkSurfaceFormatKHR> supportedFormats;
+
+        m_fn.vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, vksurface, &numFormats, nullptr);
+        supportedFormats.resize(numFormats);
+        m_fn.vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, vksurface, &numFormats, supportedFormats.data());
+
+        PixelFormat requestedFmt = desc.format;
+        VkFormat nativeFormat = convertPixelFormatVk(requestedFmt);
+        VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
+        bool fmtSupported = false;
+
+        for (const auto& fmt : supportedFormats) {
+            if (fmt.format == nativeFormat) {
+                colorSpace = fmt.colorSpace;
+                fmtSupported = true;
+                break;
+            }
+        }
+
+        if (!fmtSupported) {
+            nativeFormat = supportedFormats[0].format;
+            colorSpace = supportedFormats[0].colorSpace;
+        }
+
+        VkSwapchainKHR swapchain;
+        VkSwapchainCreateInfoKHR swapchainInfo{};
+        swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        swapchainInfo.surface = vksurface;
+        swapchainInfo.minImageCount = std::min(std::max(surfCaps.minImageCount, desc.numSwapBuffer), surfCaps.maxImageCount);
+        swapchainInfo.imageFormat = nativeFormat;
+        swapchainInfo.imageColorSpace = colorSpace;
+        swapchainInfo.imageExtent.width = surfCaps.maxImageExtent.width;
+        swapchainInfo.imageExtent.height = surfCaps.maxImageExtent.height;
+        swapchainInfo.imageArrayLayers = 1;
+        swapchainInfo.imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        swapchainInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+        swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        swapchainInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+        swapchainInfo.clipped = VK_TRUE;
+        swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
+
+        if (KUAS_VULKAN_FAILED(m_fn.vkCreateSwapchainKHR(m_device, &swapchainInfo, nullptr, &swapchain))) {
+            m_fn.vkDestroySurfaceKHR(m_instance, vksurface, nullptr);
+            return Result::ErrOutOfMemory;
+        }
+
+        VkCommandPool cmdPool;
+        VkCommandPoolCreateInfo cmdPoolInfo{};
+        cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        cmdPoolInfo.queueFamilyIndex = m_graphicsQueueFamily;
+
+        if (KUAS_VULKAN_FAILED(m_fn.vkCreateCommandPool(m_device, &cmdPoolInfo, nullptr, &cmdPool))) {
+            m_fn.vkDestroySwapchainKHR(m_device, swapchain, nullptr);
+            m_fn.vkDestroySurfaceKHR(m_instance, vksurface, nullptr);
+            return Result::ErrOutOfMemory;
+        }
+
+        *surface = new SurfaceVK(vksurface, swapchain, desc.usage, requestedFmt, colorSpace, cmdPool, this);
+
+        return Result::Ok;
+    }
+
     void DeviceVK::mapBitmap()
     {
     }
@@ -342,15 +426,18 @@ namespace kuas
     {
     }
 
-    Result DeviceVK::enqueueWait(uint32_t numWaitSemaphore, Semaphore* const* waitSemaphores)
+    Result DeviceVK::enqueueWait(uint32_t numWaitSemaphores, Semaphore* const* waitSemaphores)
     {
-        for (uint32_t i = 0; i < numWaitSemaphore; i++) {
+        for (uint32_t i = 0; i < numWaitSemaphores; i++) {
             VkSemaphore semaphore = KUAS_PTR_CAST(SemaphoreVK, waitSemaphores[i])->m_semaphore;
+            
+            // flush wait semaphores when the queue is full
             if (!m_waitQueue.push(semaphore)) {
+                KUAS_ASSERT(waitSemaphores[i] != nullptr);
                 VkSemaphore* queued = m_waitQueue.getData();
                 VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * 64);
 
-                std::fill_n(waitStageDest, 64, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+                std::fill_n(waitStageDest, 64, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
                 VkSubmitInfo submit{};
                 submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -364,6 +451,7 @@ namespace kuas
                 m_waitQueue.push(semaphore);
             }
         }
+
         return Result::Ok;
     }
 
@@ -372,7 +460,13 @@ namespace kuas
         DrawList* const* drawLists)
     {
         for (uint32_t i = 0; i < numDrawLists; i++) {
+            if (drawLists[i] == nullptr) {
+                return Result::ErrInvalidArg;
+            }
+
             VkCommandBuffer cmdBuffer = KUAS_PTR_CAST(DrawListVK, drawLists[i])->m_cmdBuffer;
+            
+            // flush command buffers when the queue is full
             if (!m_cmdBufferQueue.push(cmdBuffer)) {
                 VkCommandBuffer* queued = m_cmdBufferQueue.getData();
 
@@ -387,6 +481,7 @@ namespace kuas
                 m_cmdBufferQueue.push(cmdBuffer);
             }
         }
+
         return Result::Ok;
     }
 
@@ -407,7 +502,7 @@ namespace kuas
         uint32_t numCmdBuffers = (uint32_t)m_cmdBufferQueue.getWritePos();
         VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * numWaitSemaphores);
 
-        std::fill_n(waitStageDest, numWaitSemaphores, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+        std::fill_n(waitStageDest, numWaitSemaphores, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
         VkSubmitInfo submit{};
         submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -422,6 +517,21 @@ namespace kuas
         m_waitQueue.flush();
         m_cmdBufferQueue.flush();
         m_fn.vkQueueSubmit(m_graphicsQueue, 1, &submit, fence);
+
+        return Result::Ok;
+    }
+
+    Result DeviceVK::waitIdle()
+    {
+        VkResult result = m_fn.vkDeviceWaitIdle(m_device);
+
+        switch (result) {
+            case VK_ERROR_DEVICE_LOST:
+                return Result::ErrDeviceLost;
+            case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            case VK_ERROR_OUT_OF_HOST_MEMORY:
+                return Result::ErrOutOfMemory;
+        }
 
         return Result::Ok;
     }
@@ -472,6 +582,10 @@ namespace kuas
         m_fn.vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)instanceLoadFn(m_instance, "vkGetPhysicalDeviceProperties");
         m_fn.vkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties)instanceLoadFn(m_instance, "vkGetPhysicalDeviceMemoryProperties");
         m_fn.vkGetPhysicalDeviceImageFormatProperties = (PFN_vkGetPhysicalDeviceImageFormatProperties)instanceLoadFn(m_instance, "vkGetPhysicalDeviceImageFormatProperties");
+        m_fn.vkDestroySurfaceKHR = (PFN_vkDestroySurfaceKHR)instanceLoadFn(m_instance, "vkDestroySurfaceKHR");
+        m_fn.vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)instanceLoadFn(m_instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+        m_fn.vkGetPhysicalDeviceSurfaceFormatsKHR = (PFN_vkGetPhysicalDeviceSurfaceFormatsKHR)instanceLoadFn(m_instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+        m_fn.vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)instanceLoadFn(m_instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
 
         // device functions
         m_fn.vkAllocateCommandBuffers = (PFN_vkAllocateCommandBuffers)loadFn(m_device, "vkAllocateCommandBuffers");
@@ -594,14 +708,23 @@ namespace kuas
         m_fn.vkUnmapMemory = (PFN_vkUnmapMemory)loadFn(m_device, "vkUnmapMemory");
         m_fn.vkUpdateDescriptorSets = (PFN_vkUpdateDescriptorSets)loadFn(m_device, "vkUpdateDescriptorSets");
         m_fn.vkWaitForFences = (PFN_vkWaitForFences)loadFn(m_device, "vkWaitForFences");
+        m_fn.vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)loadFn(m_device, "vkCreateSwapchainKHR");
+        m_fn.vkDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)loadFn(m_device, "vkDestroySwapchainKHR");
+        m_fn.vkGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)loadFn(m_device, "vkGetSwapchainImagesKHR");
+        m_fn.vkAcquireNextImageKHR = (PFN_vkAcquireNextImageKHR)loadFn(m_device, "vkAcquireNextImageKHR");
+        m_fn.vkQueuePresentKHR = (PFN_vkQueuePresentKHR)loadFn(m_device, "vkQueuePresentKHR");
     }
 
     void DeviceVK::initFunctions(const VulkanFunctions& fn)
     {
         // instance functions
-        m_fn.vkGetPhysicalDeviceProperties =            fn.vkGetPhysicalDeviceProperties;
-        m_fn.vkGetPhysicalDeviceMemoryProperties =      fn.vkGetPhysicalDeviceMemoryProperties;
-        m_fn.vkGetPhysicalDeviceImageFormatProperties = fn.vkGetPhysicalDeviceImageFormatProperties;
+        m_fn.vkGetPhysicalDeviceProperties =                fn.vkGetPhysicalDeviceProperties;
+        m_fn.vkGetPhysicalDeviceMemoryProperties =          fn.vkGetPhysicalDeviceMemoryProperties;
+        m_fn.vkGetPhysicalDeviceImageFormatProperties =     fn.vkGetPhysicalDeviceImageFormatProperties;
+        m_fn.vkDestroySurfaceKHR =                          fn.vkDestroySurfaceKHR;
+        m_fn.vkGetPhysicalDeviceSurfaceSupportKHR =         fn.vkGetPhysicalDeviceSurfaceSupportKHR;
+        m_fn.vkGetPhysicalDeviceSurfaceFormatsKHR =         fn.vkGetPhysicalDeviceSurfaceFormatsKHR;
+        m_fn.vkGetPhysicalDeviceSurfaceCapabilitiesKHR =    fn.vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
 
         // device functions
         m_fn.vkAllocateCommandBuffers =                 fn.vkAllocateCommandBuffers;
@@ -724,6 +847,11 @@ namespace kuas
         m_fn.vkUnmapMemory =                            fn.vkUnmapMemory;
         m_fn.vkUpdateDescriptorSets =                   fn.vkUpdateDescriptorSets;
         m_fn.vkWaitForFences =                          fn.vkWaitForFences;
+        m_fn.vkCreateSwapchainKHR =                     fn.vkCreateSwapchainKHR;
+        m_fn.vkDestroySwapchainKHR =                    fn.vkDestroySwapchainKHR;
+        m_fn.vkGetSwapchainImagesKHR =                  fn.vkGetSwapchainImagesKHR;
+        m_fn.vkAcquireNextImageKHR =                    fn.vkAcquireNextImageKHR;
+        m_fn.vkQueuePresentKHR =                        fn.vkQueuePresentKHR;
     }
     
     void DeviceVK::initVma()
@@ -812,6 +940,21 @@ namespace kuas
         m_shaderModules[ShaderModuleID::FillRectAA_PS] =
             createShaderModule(sizeof(ShaderFillRectAA_FS), ShaderFillRectAA_FS);
     }
+
+#ifdef KUAS_USE_SDL
+    bool DeviceVK::createSurfaceSDL(const SurfaceCreateDesc& desc, VkSurfaceKHR* surface)
+    {
+        return SDL_Vulkan_CreateSurface((SDL_Window*)desc.data0, m_instance, surface) == SDL_TRUE;
+    }
+#endif
+
+#ifdef KUAS_PLATFORM_WINDOWS
+    bool DeviceVK::createSurfaceWin32(const SurfaceCreateDesc& desc, VkSurfaceKHR* surface)
+    {
+        // TODO
+        return false;
+    }
+#endif
 }
 
 #ifdef _MSC_VER

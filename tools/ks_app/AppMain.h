@@ -22,11 +22,11 @@ namespace ks_app
 
         void run();
 
-        Renderer* getRenderer() { return m_renderer.get(); }
-
+        virtual void onInit() = 0;
         virtual void onRender(double dt) = 0;
+        virtual void onResize(uint32_t w, uint32_t h);
 
-    private:
+    protected:
         std::unique_ptr<Renderer> m_renderer;
         SDL_Window* m_window;
     };

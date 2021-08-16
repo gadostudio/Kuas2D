@@ -16,6 +16,7 @@ namespace kuas
         VkSemaphore getHandle() { return m_semaphore; }
 
         friend class DeviceVK;
+        friend class SurfaceVK;
 
     private:
         VkSemaphore m_semaphore;

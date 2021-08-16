@@ -2,9 +2,6 @@
 #include "vk/RendererVK.h"
 
 #include <stdexcept>
-#include <wrl/client.h>
-
-using Microsoft::WRL::ComPtr;
 
 namespace ks_app
 {
@@ -18,7 +15,7 @@ namespace ks_app
         m_window = SDL_CreateWindow(
             title, SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, w, h,
-            SDL_WINDOW_VULKAN);
+            SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
 
         if (m_window == nullptr) {
             throw std::runtime_error("Cannot create window");
@@ -37,18 +34,31 @@ namespace ks_app
     {
         bool running = true;
 
+        onInit();
+
         while (running) {
             SDL_Event event{};
 
             while (SDL_PollEvent(&event)) {
                 switch (event.type) {
+                    case SDL_WINDOWEVENT:
+                        switch (event.window.event) {
+                            case SDL_WINDOWEVENT_RESIZED:
+                                onResize(event.window.data1, event.window.data2);
+                                break;
+                        }
+                        break;
                     case SDL_QUIT:
                         running = false;
                         break;
                 }
             }
 
-            m_renderer->swapBuffer();
+            onRender(0.0);
         }
+    }
+
+    void AppMain::onResize(uint32_t w, uint32_t h)
+    {
     }
 }

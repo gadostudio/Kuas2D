@@ -8,6 +8,7 @@
 #include "RenderTarget.h"
 #include "DrawList.h"
 #include "SyncObjects.h"
+#include "Surface.h"
 #include "RefCount.h"
 
 namespace kuas
@@ -20,9 +21,9 @@ namespace kuas
         /**
             Creates bitmap.
             
-            Bitmap is a 2-dimensional array data which can be used for reading and sending pixel data to/from GPU. 
-            Bitmap is CPU-only storage.
-          
+            Bitmap is a 2-dimensional array data which can be used for sending and reading pixel data to/from GPU. 
+            Bitmap is CPU-only storage. Thus, its memory can be mapped and CPU can directly read and write
+            pixel data.
          */
         virtual Result createBitmap(const BitmapCreateDesc& desc, Bitmap** bitmap) = 0;
         
@@ -30,8 +31,7 @@ namespace kuas
             Creates image.
             
             Image is a 2-dimensional array data which can be used for reading and writting pixel data on GPU.
-            Image is GPU-only storage. CPU cannot read and write pixel data directly through Image,
-            CPU must use a bitmap-image copy command in order to read and write into an Image.
+            Image is GPU-only storage. Thus, CPU cannot read and write pixel data directly through Image.
          */
         virtual Result createImage(const ImageCreateDesc& desc, Image** image) = 0;
         
@@ -54,25 +54,35 @@ namespace kuas
 
         virtual Result createFence(bool signaled, Fence** fence) = 0;
 
+        virtual Result createSurface(const SurfaceCreateDesc& desc, Surface** surface) = 0;
+
         virtual void mapBitmap() = 0;
 
         virtual void unmapBitmap() = 0;
 
         /**
-            Submits draw lists to the GPU.
+            Submits wait semaphores.
          */
         virtual Result enqueueWait(
-            uint32_t numWaitSemaphore,
+            uint32_t numWaitSemaphores,
             Semaphore* const* waitSemaphores) = 0;
 
+        /**
+            Submits draw lists.
+         */
         virtual Result enqueueDrawLists(
             uint32_t numDrawLists,
             DrawList* const* drawLists) = 0;
 
+        /**
+            Submits signal semaphores and an additional signal fence.
+         */
         virtual Result enqueueSignal(
-            uint32_t numSignalSemaphore,
+            uint32_t numSignalSemaphores,
             Semaphore* const* signalSemaphores,
             Fence* signalFence = nullptr) = 0;
+
+        virtual Result waitIdle() = 0;
 
         virtual Result checkBitmapPixelFormatSupport(PixelFormat format, BitmapUsageFlags usage) = 0;
         virtual Result checkImagePixelFormatSupport(PixelFormat format, ImageUsageFlags usage) = 0;

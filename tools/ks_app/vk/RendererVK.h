@@ -48,9 +48,6 @@ namespace ks_app
         RendererVK(SDL_Window* window, uint32_t w, uint32_t h);
         ~RendererVK();
 
-        void resize(uint32_t w, uint32_t h) override;
-        void swapBuffer() override;
-
         kuas::Ref<kuas::Device>& getKuasDevice() override { return m_ksDevice; }
 
     private:
@@ -58,43 +55,12 @@ namespace ks_app
         VkInstance m_instance;
         VkPhysicalDevice m_physicalDevice;
         VkDevice m_device;
-        VkSurfaceKHR m_surface;
         uint32_t m_graphicsQueueFamily;
         VkQueue m_graphicsQueue;
-        VkSwapchainKHR m_swapchain;
-        VkCommandPool m_cmdPool;
-        
         kuas::Ref<kuas::Device> m_ksDevice;
-
-        struct BackbufferFormatMapping
-        {
-            VkFormat vkFormat;
-            kuas::PixelFormat ksFormat;
-        };
-
-        BackbufferFormatMapping m_backbufferFmt;
-
-        struct FrameData
-        {
-            VkImageView imageView;
-            kuas::Ref<kuas::Image> renderTargetImage;
-            kuas::Ref<kuas::RenderTarget> renderTarget;
-            kuas::Ref<kuas::Semaphore> imageAcquiredSemaphore;
-            kuas::Ref<kuas::Semaphore> renderFinishedSemaphore;
-            kuas::Ref<kuas::Fence> frameFence;
-            kuas::Ref<kuas::DrawList> drawList;
-        };
-
-        std::array<FrameData, 2> m_frameData;
-        uint32_t m_currentFrame;
-
-        kuas::Ref<kuas::DrawPass> m_drawPass;
-        kuas::Ref<kuas::DrawList> m_drawList;
 
         void initInstance();
         void initDevice();
-        void initSwapchain(SDL_Window* window);
         void initKuas();
-        void initFrameData();
     };
 }

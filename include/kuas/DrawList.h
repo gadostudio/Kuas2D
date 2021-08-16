@@ -24,7 +24,7 @@ namespace kuas
             RenderTarget* renderTarget,
             const ColorRGBA* clearValue);
 
-        void setRenderState(Ref<RenderState>& renderState);
+        void setRenderState(RenderState* renderState);
         void setViewport(const ViewportDesc& viewport);
         void setScissorRect(const Rect2I& rect);
         void setTransformation(const Mat3F& mat);
