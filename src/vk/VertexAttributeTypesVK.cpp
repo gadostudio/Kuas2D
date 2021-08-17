@@ -60,4 +60,29 @@ namespace kuas
         { 1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(FillRoundedRectVertex, col) },
         { 3, 0, VK_FORMAT_R32_SFLOAT, offsetof(FillRoundedRectVertex, roundness) }
     };
+
+    //
+
+    const VkVertexInputBindingDescription CircleVertexVK::bindings[1] = {
+        { 0, sizeof(CircleVertex), VK_VERTEX_INPUT_RATE_VERTEX }
+    };
+
+    const VkVertexInputAttributeDescription CircleVertexVK::attributes[4] = {
+        { 0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(CircleVertexVK, pos) },
+        { 1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(CircleVertexVK, col) },
+        { 2, 0, VK_FORMAT_R32_SFLOAT, offsetof(CircleVertexVK, radius) },
+        { 3, 0, VK_FORMAT_R32_SFLOAT, offsetof(CircleVertexVK, thickness) }
+    };
+
+    //
+
+    const VkVertexInputBindingDescription FillCircleVertexVK::bindings[1] = {
+        { 0, sizeof(FillCircleVertex), VK_VERTEX_INPUT_RATE_VERTEX }
+    };
+
+    const VkVertexInputAttributeDescription FillCircleVertexVK::attributes[3] = {
+        { 0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(FillCircleVertexVK, pos) },
+        { 1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(FillCircleVertexVK, col) },
+        { 2, 0, VK_FORMAT_R32_SFLOAT, offsetof(FillCircleVertexVK, radius) }
+    };
 }

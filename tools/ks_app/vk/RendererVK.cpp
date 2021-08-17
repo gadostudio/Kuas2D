@@ -42,6 +42,7 @@ namespace ks_app
     {
         static const char* instanceLayers[] = {
             "VK_LAYER_KHRONOS_validation",
+            "VK_LAYER_NV_optimus"
         };
 
         static const char* instanceExts[] = {

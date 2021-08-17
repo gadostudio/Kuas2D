@@ -101,6 +101,11 @@ namespace kuas
         m_vtxDrawCount++;
     }
 
+    void DrawList::drawRect(float x, float y, float width, float height)
+    {
+        drawRect({ x, y, width, height });
+    }
+
     void DrawList::drawRoundedRect(const Rect2F& rect, float roundness)
     {
         flushCommands(PipelineID::RoundedRect);
@@ -119,6 +124,11 @@ namespace kuas
         m_vtxDrawCount++;
     }
 
+    void DrawList::drawRoundedRect(float x, float y, float width, float height, float roundness)
+    {
+        drawRoundedRect({ x, y, width, height }, roundness);
+    }
+
     void DrawList::drawTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)
     {    
     }    
@@ -127,9 +137,35 @@ namespace kuas
     {    
     }    
 
-    void DrawList::drawCircle(const Vec2F& pos, float radius)
-    {    
-    }    
+    void DrawList::drawCircle(const Vec2F& centerPos, float radius)
+    {
+        flushCommands(PipelineID::Circle);
+
+        CircleVertex* vtx = reinterpret_cast<CircleVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+        vtx->pos.x = centerPos.x;
+        vtx->pos.y = centerPos.y;
+        vtx->col = m_lineColor;
+        vtx->radius = radius;
+        vtx->thickness = m_lineThickness;
+
+        m_vtxCurrentWriteOffset += sizeof(CircleVertex);
+        m_vtxDrawSize += sizeof(CircleVertex);
+        m_vtxDrawCount++;
+    }
+
+    void DrawList::drawCircle(float cx, float cy, float radius)
+    {
+        drawCircle(Vec2F(cx, cy), radius);
+    }
+
+    void DrawList::drawLine(const Vec2F& p0, const Vec2F& p1)
+    {
+    }
+
+    void DrawList::drawLine(float x0, float y0, float x1, float y1)
+    {
+        drawLine(Vec2F(x0, y0), Vec2F(x1, y1));
+    }
 
     void DrawList::fillRect(const Rect2F& rect)
     {
@@ -146,6 +182,11 @@ namespace kuas
         m_vtxCurrentWriteOffset += sizeof(FillRectVertex);
         m_vtxDrawSize += sizeof(FillRectVertex);
         m_vtxDrawCount++;
+    }
+
+    void DrawList::fillRect(float x, float y, float width, float height)
+    {
+        fillRect({ x, y, width, height });
     }
 
     void DrawList::fillRoundedRect(const Rect2F& rect, float roundness)
@@ -165,18 +206,37 @@ namespace kuas
         m_vtxDrawCount++;
     }
 
+    void DrawList::fillRoundedRect(float x, float y, float width, float height, float roundness)
+    {
+        fillRoundedRect({ x, y, width, height }, roundness);
+    }
+
     void DrawList::fillTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)
     {
-        flushCommands(PipelineID::FillTriangle);
     }
 
     void DrawList::fillQuad(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2, const Vec2F& p3)
     {
     }
 
-    void DrawList::fillCircle(const Vec2F& pos, float radius)
+    void DrawList::fillCircle(const Vec2F& centerPos, float radius)
     {
         flushCommands(PipelineID::FillCircle);
+
+        FillCircleVertex* vtx = reinterpret_cast<FillCircleVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+        vtx->pos.x = centerPos.x;
+        vtx->pos.y = centerPos.y;
+        vtx->col = m_fillColor;
+        vtx->radius = radius;
+
+        m_vtxCurrentWriteOffset += sizeof(FillCircleVertex);
+        m_vtxDrawSize += sizeof(FillCircleVertex);
+        m_vtxDrawCount++;
+    }
+
+    void DrawList::fillCircle(float cx, float cy, float radius)
+    {
+        fillCircle(Vec2F(cx, cy), radius);
     }
 
     void DrawList::endDrawPass()

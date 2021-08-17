@@ -16,7 +16,6 @@ layout(location = 1) in float vs_thickness[];
 layout(location = 2) in float vs_roundness[];
 #endif
 
-
 // to fragment shader
 layout(location = 0) out vec4 fs_col;
 #ifdef KUAS_USE_SDF
@@ -30,7 +29,6 @@ layout(location = 3) out float fs_thickness;
 layout(location = 4) out float fs_roundness;
 #endif
 
-
 layout(push_constant, row_major) uniform PushConstants {
     mat3 transform;
     vec2 scale;
@@ -41,9 +39,10 @@ void main()
     vec2 a = gl_in[0].gl_Position.xy;
     vec2 b = gl_in[0].gl_Position.zw;
 #ifdef KUAS_USE_SDF
-    // preserve pixel for AA parts
     vec2 size = b - a;
     vec2 halfSize = size * 0.5;
+
+    // preserve pixel for AA parts
     a -= vec2(1.0);
     b += vec2(1.0);
 #endif

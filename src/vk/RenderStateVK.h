@@ -16,6 +16,7 @@ namespace kuas
         RenderStateVK(
             VkPipeline rectPipe,
             VkPipeline roundedRectPipe,
+            VkPipeline circlePipe,
             VkPipeline fillRectPipe,
             VkPipeline fillRoundedRectPipe,
             VkPipeline fillCirclePipe,

@@ -29,3 +29,19 @@ glslangValidator --target-env vulkan1.0 -S frag -DKUAS_FILL_SHAPE -DKUAS_ROUNDED
 
 glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE -DKUAS_ROUNDED_SHAPE --vn ShaderFillRoundedRectAA_GS -o FillRoundedRectAA_GS.h glsl/Rect_GS.glsl
 glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE -DKUAS_ROUNDED_SHAPE --vn ShaderFillRoundedRectAA_FS -o FillRoundedRectAA_FS.h glsl/Rect_FS.glsl
+
+REM Circle
+glslangValidator --target-env vulkan1.0 -S vert --vn ShaderCircle_VS -o Circle_VS.h glsl/Circle_VS.glsl
+glslangValidator --target-env vulkan1.0 -S geom --vn ShaderCircle_GS -o Circle_GS.h glsl/Circle_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag --vn ShaderCircle_FS -o Circle_FS.h glsl/Circle_FS.glsl
+
+glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS --vn ShaderCircleAA_GS -o CircleAA_GS.h glsl/Circle_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS --vn ShaderCircleAA_FS -o CircleAA_FS.h glsl/Circle_FS.glsl
+
+REM Fill circle
+glslangValidator --target-env vulkan1.0 -S vert -DKUAS_FILL_SHAPE --vn ShaderFillCircle_VS -o FillCircle_VS.h glsl/Circle_VS.glsl
+glslangValidator --target-env vulkan1.0 -S geom -DKUAS_FILL_SHAPE --vn ShaderFillCircle_GS -o FillCircle_GS.h glsl/Circle_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag -DKUAS_FILL_SHAPE --vn ShaderFillCircle_FS -o FillCircle_FS.h glsl/Circle_FS.glsl
+
+glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE --vn ShaderFillCircleAA_GS -o FillCircleAA_GS.h glsl/Circle_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE --vn ShaderFillCircleAA_FS -o FillCircleAA_FS.h glsl/Circle_FS.glsl

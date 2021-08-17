@@ -224,7 +224,16 @@ namespace kuas
         VkPipeline fillRoundedRect = builder.buildFillRoundedRect();
         KUAS_ASSERT(fillRoundedRect != nullptr && "Failed to create graphics pipeline");
 
-        *renderState = new RenderStateVK(rect, roundedRect, fillRect, fillRoundedRect, nullptr, ColorStateDesc{}, this);
+        VkPipeline circle = builder.buildCircle();
+        KUAS_ASSERT(circle != nullptr && "Failed to create graphics pipeline");
+
+        VkPipeline fillCircle = builder.buildFillCircle();
+        KUAS_ASSERT(fillCircle != nullptr && "Failed to create graphics pipeline");
+
+        *renderState = new RenderStateVK(
+            rect, roundedRect, circle,
+            fillRect, fillRoundedRect, fillCircle,
+            ColorStateDesc{}, this);
 
         return Result::Ok;
     }
@@ -421,6 +430,8 @@ namespace kuas
 
     Result DeviceVK::enqueueWait(uint32_t numWaitSemaphores, Semaphore* const* waitSemaphores)
     {
+        VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * 64);
+
         for (uint32_t i = 0; i < numWaitSemaphores; i++) {
             VkSemaphore semaphore = KUAS_PTR_CAST(SemaphoreVK, waitSemaphores[i])->m_semaphore;
             
@@ -428,7 +439,6 @@ namespace kuas
             if (!m_waitQueue.push(semaphore)) {
                 KUAS_ASSERT(waitSemaphores[i] != nullptr);
                 VkSemaphore* queued = m_waitQueue.getData();
-                VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * 64);
 
                 std::fill_n(waitStageDest, 64, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
@@ -895,13 +905,16 @@ namespace kuas
         return mod;
     }
 
-#include "../shaders/BasicPolyFillNoAA_VS.h"
-#include "../shaders/BasicPolyFillNoAA_FS.h"
 #include "../shaders/Rect_VS.h"
 #include "../shaders/Rect_GS.h"
 #include "../shaders/Rect_FS.h"
 #include "../shaders/RectAA_GS.h"
 #include "../shaders/RectAA_FS.h"
+#include "../shaders/Circle_VS.h"
+#include "../shaders/Circle_GS.h"
+#include "../shaders/Circle_FS.h"
+#include "../shaders/CircleAA_GS.h"
+#include "../shaders/CircleAA_FS.h"
 #include "../shaders/RoundedRect_VS.h"
 #include "../shaders/RoundedRect_GS.h"
 #include "../shaders/RoundedRect_FS.h"
@@ -917,15 +930,14 @@ namespace kuas
 #include "../shaders/FillRoundedRect_FS.h"
 #include "../shaders/FillRoundedRectAA_GS.h"
 #include "../shaders/FillRoundedRectAA_FS.h"
+#include "../shaders/FillCircle_VS.h"
+#include "../shaders/FillCircle_GS.h"
+#include "../shaders/FillCircle_FS.h"
+#include "../shaders/FillCircleAA_GS.h"
+#include "../shaders/FillCircleAA_FS.h"
 
     void DeviceVK::initShaderModule()
     {
-        m_shaderModules[ShaderModuleID::BasicPolyFillNoAA_VS] =
-            createShaderModule(sizeof(ShaderBasicPolyFillNoAA_VS), ShaderBasicPolyFillNoAA_VS);
-
-        m_shaderModules[ShaderModuleID::BasicPolyFillNoAA_PS] =
-            createShaderModule(sizeof(ShaderBasicPolyFillNoAA_FS), ShaderBasicPolyFillNoAA_FS);
-
         m_shaderModules[ShaderModuleID::Rect_VS] =
             createShaderModule(sizeof(ShaderRect_VS), ShaderRect_VS);
 
@@ -956,6 +968,21 @@ namespace kuas
         m_shaderModules[ShaderModuleID::RoundedRectAA_PS] =
             createShaderModule(sizeof(ShaderRoundedRectAA_FS), ShaderRoundedRectAA_FS);
 
+        m_shaderModules[ShaderModuleID::Circle_VS] =
+            createShaderModule(sizeof(ShaderCircle_VS), ShaderCircle_VS);
+
+        m_shaderModules[ShaderModuleID::Circle_GS] =
+            createShaderModule(sizeof(ShaderCircle_GS), ShaderCircle_GS);
+
+        m_shaderModules[ShaderModuleID::Circle_PS] =
+            createShaderModule(sizeof(ShaderCircle_FS), ShaderCircle_FS);
+
+        m_shaderModules[ShaderModuleID::CircleAA_GS] =
+            createShaderModule(sizeof(ShaderCircleAA_GS), ShaderCircleAA_GS);
+
+        m_shaderModules[ShaderModuleID::CircleAA_PS] =
+            createShaderModule(sizeof(ShaderCircleAA_FS), ShaderCircleAA_FS);
+
         m_shaderModules[ShaderModuleID::FillRect_VS] =
             createShaderModule(sizeof(ShaderFillRect_VS), ShaderFillRect_VS);
 
@@ -985,6 +1012,21 @@ namespace kuas
 
         m_shaderModules[ShaderModuleID::FillRoundedRectAA_PS] =
             createShaderModule(sizeof(ShaderFillRoundedRectAA_FS), ShaderFillRoundedRectAA_FS);
+
+        m_shaderModules[ShaderModuleID::FillCircle_VS] =
+            createShaderModule(sizeof(ShaderFillCircle_VS), ShaderFillCircle_VS);
+
+        m_shaderModules[ShaderModuleID::FillCircle_GS] =
+            createShaderModule(sizeof(ShaderFillCircle_GS), ShaderFillCircle_GS);
+
+        m_shaderModules[ShaderModuleID::FillCircle_PS] =
+            createShaderModule(sizeof(ShaderFillCircle_FS), ShaderFillCircle_FS);
+
+        m_shaderModules[ShaderModuleID::FillCircleAA_GS] =
+            createShaderModule(sizeof(ShaderFillCircleAA_GS), ShaderFillCircleAA_GS);
+
+        m_shaderModules[ShaderModuleID::FillCircleAA_PS] =
+            createShaderModule(sizeof(ShaderFillCircleAA_FS), ShaderFillCircleAA_FS);
     }
 
 #ifdef KUAS_USE_SDL

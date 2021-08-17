@@ -6,6 +6,7 @@ namespace kuas
     RenderStateVK::RenderStateVK(
         VkPipeline rectPipe,
         VkPipeline roundedRectPipe,
+        VkPipeline circlePipe,
         VkPipeline fillRectPipe,
         VkPipeline fillRoundedRectPipe,
         VkPipeline fillCirclePipe,
@@ -17,6 +18,7 @@ namespace kuas
         m_pipelines[PipelineID::Unknown] = VK_NULL_HANDLE;
         m_pipelines[PipelineID::Rect] = rectPipe;
         m_pipelines[PipelineID::RoundedRect] = roundedRectPipe;
+        m_pipelines[PipelineID::Circle] = circlePipe;
         m_pipelines[PipelineID::FillRect] = fillRectPipe;
         m_pipelines[PipelineID::FillRoundedRect] = fillRoundedRectPipe;
         m_pipelines[PipelineID::FillCircle] = fillCirclePipe;

@@ -9,6 +9,7 @@ namespace kuas
             Unknown,
             Rect,
             RoundedRect,
+            Circle,
             FillRect,
             FillRoundedRect,
             FillCircle,

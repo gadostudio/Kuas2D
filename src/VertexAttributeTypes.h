@@ -46,9 +46,9 @@ namespace kuas
     struct CircleVertex
     {
         Vec2F pos;
+        ColorRGBA col;
         float radius;
         float thickness;
-        ColorRGBA col;
     };
 
     struct FillCircleVertex

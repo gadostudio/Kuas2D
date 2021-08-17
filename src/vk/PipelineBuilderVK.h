@@ -21,20 +21,24 @@ namespace kuas
         VkPipeline buildRoundedRect();
         VkPipeline buildFillRect();
         VkPipeline buildFillRoundedRect();
+        VkPipeline buildCircle();
         VkPipeline buildFillCircle();
 
     private:
-        VkPipelineDynamicStateCreateInfo m_dynamicStateInfo{};
-        VkPipelineViewportStateCreateInfo m_viewportInfo{};
-        VkPipelineRasterizationStateCreateInfo m_rasterizationInfo{};
-        VkPipelineMultisampleStateCreateInfo m_multisampleInfo{};
-        VkPipelineDepthStencilStateCreateInfo m_depthStencilInfo{};
         VkRenderPass m_renderPass;
         VkPipelineCache m_pipelineCache;
         const RenderStateCreateDesc& m_renderState;
         const VulkanFunctions& m_fn;
         DeviceVK* m_device;
 
-        static const VkDynamicState g_dynamicStates[3];
+
+        VkPipeline buildPipeline(
+            VkShaderModule vs,
+            VkShaderModule gs,
+            VkShaderModule fs,
+            VkPipelineLayout layout,
+            const VkPipelineInputAssemblyStateCreateInfo& inputAssembly,
+            const VkPipelineVertexInputStateCreateInfo& vertexInput,
+            const VkPipelineColorBlendStateCreateInfo& colorBlend);
     };
 }

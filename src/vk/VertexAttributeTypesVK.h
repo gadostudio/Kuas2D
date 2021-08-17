@@ -34,4 +34,16 @@ namespace kuas
         static const VkVertexInputBindingDescription bindings[1];
         static const VkVertexInputAttributeDescription attributes[3];
     };
+
+    struct CircleVertexVK : public CircleVertex
+    {
+        static const VkVertexInputBindingDescription bindings[1];
+        static const VkVertexInputAttributeDescription attributes[4];
+    };
+
+    struct FillCircleVertexVK : public FillCircleVertex
+    {
+        static const VkVertexInputBindingDescription bindings[1];
+        static const VkVertexInputAttributeDescription attributes[3];
+    };
 }

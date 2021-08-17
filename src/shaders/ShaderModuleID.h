@@ -32,10 +32,18 @@ namespace kuas
             FillRoundedRect_PS,
             FillRoundedRectAA_GS,
             FillRoundedRectAA_PS,
-
+            
             Circle_VS,
             Circle_GS,
             Circle_PS,
+            CircleAA_GS,
+            CircleAA_PS,
+
+            FillCircle_VS,
+            FillCircle_GS,
+            FillCircle_PS,
+            FillCircleAA_GS,
+            FillCircleAA_PS,
 
             Count
         };
