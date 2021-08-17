@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 project(kuas)
 
+option(KUAS_BUILD_TESTS "Build test" OFF)
+
 add_subdirectory(extern)
 
 set(KUAS_VULKAN_BACKEND_SRC
@@ -57,3 +59,8 @@ target_include_directories(
 
 add_subdirectory(tools/ks_app)
 add_subdirectory(examples)
+
+if(${KUAS_BUILD_TEST})
+    enable_testing()
+    add_subdirectory(test)
+endif()
