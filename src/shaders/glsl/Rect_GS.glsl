@@ -40,7 +40,7 @@ void main()
     vec2 b = gl_in[0].gl_Position.zw;
 #ifdef KUAS_USE_SDF
     vec2 size = b - a;
-    vec2 halfSize = size * 0.5;
+    vec2 halfSize = (size * 0.5) - 0.5;
 
     // preserve pixel for AA parts
     a -= vec2(1.0);

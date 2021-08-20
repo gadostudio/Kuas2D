@@ -50,63 +50,67 @@ public:
         scissor.width = 640;
         scissor.height = 480;
 
+        kuas::ColorRGBA color(0.0f);
+
         for (uint32_t i = 0; i < numSurfaceImages; i++) {
             getDevice()->createDrawList(&drawLists[i]);
 
             drawLists[i]->begin();
-            drawLists[i]->beginDrawPass(getSurfaceDrawPass().get(), getSurfaceRenderTarget(i).get(), nullptr);
+            drawLists[i]->beginDrawPass(getSurfaceDrawPass().get(), getSurfaceRenderTarget(i).get(), &color);
             drawLists[i]->setRenderState(renderState.get());
-            drawLists[i]->setLineThickness(2.0f);
+            drawLists[i]->setLineThickness(1.0f);
             drawLists[i]->setViewport(viewport);
             drawLists[i]->setScissorRect(scissor);
+            drawLists[i]->setTransformation(kuas::scale(1.0f, 1.0f));
+            //drawLists[i]->setTransformation(kuas::rotate(kuas::degreeToRadian(25.0f)) * kuas::scale(1.0f, 2.5f));
 
             // Rectangle
             drawLists[i]->setLineColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->drawRect({ 20.5f, 20.5f, 80.0f, 80.0f });
+            drawLists[i]->drawRect({ 20.0f, 20.0f, 80.0f, 80.0f });
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->drawRect({ 20.5f, 104.5f, 80.0f, 80.0f });
+            drawLists[i]->drawRect({ 20.0f, 104.0f, 80.0f, 80.0f });
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->drawRect({ 20.5f, 188.5f, 80.0f, 80.0f });
+            drawLists[i]->drawRect({ 20.0f, 188.0f, 80.0f, 80.0f });
 
             // Rounded Rectangle
             drawLists[i]->setLineColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->drawRoundedRect({ 104.5f, 20.5f, 80.0f, 80.0f }, 15.f);
+            drawLists[i]->drawRoundedRect({ 104.0f, 20.0f, 80.0f, 80.0f }, 15.f);
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->drawRoundedRect({ 104.5f, 104.5f, 80.0f, 80.0f }, 15.f);
+            drawLists[i]->drawRoundedRect({ 104.0f, 104.0f, 80.0f, 80.0f }, 15.f);
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->drawRoundedRect({ 104.5f, 188.5f, 80.0f, 80.0f }, 15.f);
+            drawLists[i]->drawRoundedRect({ 104.0f, 188.0f, 80.0f, 80.0f }, 15.f);
 
             // Fill Rectangle
             drawLists[i]->setFillColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->fillRect({ 200.5f, 20.5f, 80.0f, 80.0f });
+            drawLists[i]->fillRect({ 200.0f, 20.0f, 80.0f, 80.0f });
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->fillRect({ 200.5f, 104.5f, 80.0f, 80.0f });
+            drawLists[i]->fillRect({ 200.0f, 104.0f, 80.0f, 80.0f });
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->fillRect({ 200.5f, 188.5f, 80.0f, 80.0f });
+            drawLists[i]->fillRect({ 200.0f, 188.0f, 80.0f, 80.0f });
 
             // Fill Rounded Rectangle
             drawLists[i]->setFillColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->fillRoundedRect({ 284.5f, 20.5f, 80.f, 80.f }, 15.f);
+            drawLists[i]->fillRoundedRect({ 284.0f, 20.0f, 80.f, 80.f }, 15.f);
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->fillRoundedRect({ 284.5f, 104.5f, 80.f, 80.f }, 15.f);
+            drawLists[i]->fillRoundedRect({ 284.0f, 104.0f, 80.f, 80.f }, 15.f);
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->fillRoundedRect({ 284.5f, 188.5f, 80.f, 80.f }, 15.f);
+            drawLists[i]->fillRoundedRect({ 284.0f, 188.0f, 80.f, 80.f }, 15.f);
 
             // Circle
             drawLists[i]->setLineColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->drawCircle(kuas::Vec2F(420.5f, 60.5f), 40.0f);
+            drawLists[i]->drawCircle(kuas::Vec2F(420.0f, 60.0f), 40.0f);
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->drawCircle(kuas::Vec2F(420.5f, 144.5f), 40.0f);
+            drawLists[i]->drawCircle(kuas::Vec2F(420.0f, 144.0f), 40.0f);
             drawLists[i]->setLineColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->drawCircle(kuas::Vec2F(420.5f, 228.5f), 40.0f);
+            drawLists[i]->drawCircle(kuas::Vec2F(420.0f, 228.0f), 40.0f);
 
             // Fill Circle
             drawLists[i]->setFillColor(kuas::ColorRGBA(1.0f, 0.0f, 0.0f));
-            drawLists[i]->fillCircle(kuas::Vec2F(504.5f, 60.5f), 40.0f);
+            drawLists[i]->fillCircle(kuas::Vec2F(504.0f, 60.0f), 40.0f);
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 1.0f, 0.0f));
-            drawLists[i]->fillCircle(kuas::Vec2F(504.5f, 144.5f), 40.0f);
+            drawLists[i]->fillCircle(kuas::Vec2F(504.0f, 144.0f), 40.0f);
             drawLists[i]->setFillColor(kuas::ColorRGBA(0.0f, 0.0f, 1.0f));
-            drawLists[i]->fillCircle(kuas::Vec2F(504.5f, 228.5f), 40.0f);
+            drawLists[i]->fillCircle(kuas::Vec2F(504.0f, 228.0f), 40.0f);
 
             drawLists[i]->endDrawPass();
             drawLists[i]->end();

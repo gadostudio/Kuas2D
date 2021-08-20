@@ -86,40 +86,6 @@ namespace kuas
         template<class FriendT>
         friend static Mat3<FriendT> operator*(const Mat3<FriendT>& a, const Mat3<FriendT>& b);
 
-        static inline Mat3<T> translate(T x, T y) noexcept
-        {
-            return Mat3<T>(
-                1.0f, 0.0f, x,
-                0.0f, 1.0f, y,
-                0.0f, 0.0f, 1.0f);
-        }
-
-        static inline Mat3<T> scale(T x, T y) noexcept
-        {
-            return Mat3<T>(
-                x,    0.0f, 0.0f,
-                0.0f, y,    0.0f,
-                0.0f, 0.0f, 1.0f);
-        }
-
-        static inline Mat3<T> scaleAt(T x, T y, const Vec2<T>& center) noexcept
-        {
-            return Mat3<T>(
-                x,    0.0f, center.x - x * center.x,
-                0.0f, y,    center.y - y * center.y,
-                0.0f, 0.0f, 1.0f);
-        }
-
-        static inline Mat3<T> rotate(T angle) noexcept
-        {
-            T s = std::sin(angle);
-            T c = std::cos(angle);
-            return Mat3<T>(
-                 c,    s,    0.0f,
-                -s,    c,    0.0f,
-                 0.0f, 0.0f, 1.0f);
-        }
-
     private:
         Mat3(bool)
         {
@@ -127,7 +93,7 @@ namespace kuas
     };
 
     template<typename T>
-    static inline Mat3<T> operator+(const Mat3<T>& a, const Mat3<T>& b)
+    inline static Mat3<T> operator+(const Mat3<T>& a, const Mat3<T>& b)
     {
         return Mat3<T>(
             a.m[0][0] + b.m[0][0], a.m[0][1] + b.m[0][1], a.m[0][2] + b.m[0][2],
@@ -136,7 +102,7 @@ namespace kuas
     }
 
     template<typename T>
-    static inline Mat3<T> operator-(const Mat3<T>& a, const Mat3<T>& b)
+    inline static Mat3<T> operator-(const Mat3<T>& a, const Mat3<T>& b)
     {
         return Mat3<T>(
             a.m[0][0] - b.m[0][0], a.m[0][1] - b.m[0][1], a.m[0][2] - b.m[0][2],
@@ -145,7 +111,7 @@ namespace kuas
     }
 
     template<typename T>
-    static inline Mat3<T> operator*(const Mat3<T>& a, const Mat3<T>& b)
+    inline static Mat3<T> operator*(const Mat3<T>& a, const Mat3<T>& b)
     {
         Mat3<T> ret(true);
 
@@ -171,6 +137,101 @@ namespace kuas
         ret.m[2][2] = x * b.m[0][2] + y * b.m[1][2] + z * b.m[2][2];
 
         return ret;
+    }
+
+    template<typename T>
+    inline static T determinant(const Mat3<T>& m)
+    {
+        return ((m.m[0][0] * m.m[1][1] * m.m[2][2]) + (m.m[0][1] * m.m[1][2] * m.m[2][0]) + (m.m[0][2] * m.m[1][0] * m.m[2][1]))
+            - ((m.m[2][0] * m.m[1][1] * m.m[0][2]) + (m.m[2][1] * m.m[1][2] * m.m[0][0]) + (m.m[2][2] * m.m[1][0] * m.m[0][1]));
+    }
+
+    template<typename T>
+    inline static Mat3<T> inverse(const Mat3<T>& m)
+    {
+        return Mat3<T>();
+    }
+
+    template<typename T>
+    inline static Mat3<T> translate(T x, T y) noexcept
+    {
+        return Mat3<T>(
+            1.0f, 0.0f, x,
+            0.0f, 1.0f, y,
+            0.0f, 0.0f, 1.0f);
+    }
+
+    template<typename T>
+    inline static Mat3<T> scale(T x, T y) noexcept
+    {
+        return Mat3<T>(
+            x,    0.0f, 0.0f,
+            0.0f, y,    0.0f,
+            0.0f, 0.0f, 1.0f);
+    }
+
+    template<typename T>
+    inline static Mat3<T> scaleAt(T x, T y, const Vec2<T>& center) noexcept
+    {
+        return Mat3<T>(
+            x,    0.0f, center.x - x * center.x,
+            0.0f, y,    center.y - y * center.y,
+            0.0f, 0.0f, 1.0f);
+    }
+
+    template<typename T>
+    inline static Mat3<T> rotate(T angle) noexcept
+    {
+        T s = std::sin(angle);
+        T c = std::cos(angle);
+        return Mat3<T>(
+            c,   -s,    0.0f,
+            s,    c,    0.0f,
+            0.0f, 0.0f, 1.0f);
+    }
+
+    template<typename T>
+    inline static Mat3<T> skewX(T shear) noexcept
+    {
+        return Mat3<T>(
+            1, std::tan(shear), 0,
+            0, 1,               0,
+            0, 0,               1);
+    }
+
+    template<typename T>
+    inline static Mat3<T> skewY(T shear) noexcept
+    {
+        return Mat3<T>(
+            1,               0, 0,
+            std::tan(shear), 1, 0,
+            0,               0, 1);
+    }
+
+    template<typename T>
+    inline static Mat3<T> reflectX() noexcept
+    {
+        return Mat3<T>(
+            -1, 0, 0,
+             0, 1, 0,
+             0, 0, 1);
+    }
+
+    template<typename T>
+    inline static Mat3<T> reflectY() noexcept
+    {
+        return Mat3<T>(
+             1,  0, 0,
+             0, -1, 0,
+             0,  0, 1);
+    }
+
+    template<typename T>
+    inline static Vec2<T> transform(const Mat3<T>& m, const Vec2<T>& v)
+    {
+        return Vec2<T>(
+            m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2],
+            m.m[1][0] * v.x + m.m[1][1] * v.y + m.m[1][2]);
     }
 
     using Mat3F = Mat3<float>;

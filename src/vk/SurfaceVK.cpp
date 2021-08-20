@@ -14,6 +14,8 @@ namespace kuas
         VkColorSpaceKHR colorSpace,
         VkCommandPool cmdPool,
         DeviceVK* parentDevice) :
+        m_device(parentDevice->getDevice()),
+        m_presentQueue(parentDevice->getQueue()),
         m_surface(surface),
         m_swapchain(VK_NULL_HANDLE),
         m_usage(usage),
@@ -31,8 +33,6 @@ namespace kuas
     
     SurfaceVK::~SurfaceVK()
     {
-        VkDevice device = m_parentDevice->getDevice();
-
         m_parentDevice->waitIdle();
 
         for (uint32_t i = 0; i < m_numImages; i++) {
@@ -41,14 +41,13 @@ namespace kuas
 
         destroySwapchainObjects();
 
-        m_fn.vkDestroyCommandPool(device, m_cmdPool, nullptr);
-        m_fn.vkDestroySwapchainKHR(device, m_swapchain, nullptr);
+        m_fn.vkDestroyCommandPool(m_device, m_cmdPool, nullptr);
+        m_fn.vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         m_fn.vkDestroySurfaceKHR(m_parentDevice->getInstance(), m_surface, nullptr);
     }
     
     Result SurfaceVK::resize(uint32_t width, uint32_t height)
     {
-        VkDevice device = m_parentDevice->getDevice();
         VmaAllocator allocator = m_parentDevice->getAllocator();
         
         m_parentDevice->waitIdle();
@@ -97,7 +96,7 @@ namespace kuas
             VmaAllocation allocation = VK_NULL_HANDLE;
 
             // We don't use createImage() because we need to resize the image memory when needed and avoid memory reallocation.
-            VkResult result = m_fn.vkCreateImage(device, &imgInfo, nullptr, &image);
+            VkResult result = m_fn.vkCreateImage(m_device, &imgInfo, nullptr, &image);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
             if (m_images[i] != nullptr) {
@@ -119,15 +118,15 @@ namespace kuas
             vmaBindImageMemory(allocator, allocation, image);
 
             imgView.image = image;
-            result = m_fn.vkCreateImageView(device, &imgView, nullptr, &imageView);
+            result = m_fn.vkCreateImageView(m_device, &imgView, nullptr, &imageView);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
             if (m_images[i] == nullptr) {
                 m_images[i] = new ImageVK(imgDesc, image, imageView, allocation, m_parentDevice);
             }
             else {
-                m_fn.vkDestroyImage(device, m_images[i]->m_image, nullptr);
-                m_fn.vkDestroyImageView(device, m_images[i]->m_imageView, nullptr);
+                m_fn.vkDestroyImage(m_device, m_images[i]->m_image, nullptr);
+                m_fn.vkDestroyImageView(m_device, m_images[i]->m_imageView, nullptr);
 
                 m_images[i]->m_allocation = allocation;
                 m_images[i]->m_image = image;
@@ -145,8 +144,6 @@ namespace kuas
 
     Result SurfaceVK::swapBuffer(uint32_t numWaitSemaphores, Semaphore* const* semaphores)
     {
-        VkDevice device = m_parentDevice->getDevice();
-        VkQueue queue = m_parentDevice->getQueue();
         VkCommandBuffer cb = m_cmdBuffers[m_currentBackBuffer];
         VkSemaphore* waitSemaphores = (VkSemaphore*)alloca(sizeof(VkSemaphore) * (size_t)(numWaitSemaphores + 1)); // reserve one for image acquiring semaphore
         VkPipelineStageFlags* waitStageDst = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * (size_t)(numWaitSemaphores + 1));
@@ -154,7 +151,7 @@ namespace kuas
         VkSemaphore queueFinished = m_queueFinishedSemaphores[m_currentBackBuffer];
 
         VkResult result = m_fn.vkAcquireNextImageKHR(
-            device, m_swapchain, UINT64_MAX,
+            m_device, m_swapchain, UINT64_MAX,
             imageAcquired, nullptr, &m_currentBackBuffer);
 
         if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -164,7 +161,7 @@ namespace kuas
             imageAcquired = m_imageAcquiredSemaphores[m_currentBackBuffer];
             queueFinished = m_queueFinishedSemaphores[m_currentBackBuffer];
             result = m_fn.vkAcquireNextImageKHR(
-                device, m_swapchain, UINT64_MAX,
+                m_device, m_swapchain, UINT64_MAX,
                 imageAcquired, nullptr, &m_currentBackBuffer);
         }
 
@@ -178,10 +175,6 @@ namespace kuas
 
         waitSemaphores[numWaitSemaphores] = imageAcquired;
         waitStageDst[numWaitSemaphores] = VK_PIPELINE_STAGE_TRANSFER_BIT;
-
-        VkFence frameFence = m_frameFences[m_currentBackBuffer];
-        VkFence prevFrameFence = m_frameFences[(m_currentBackBuffer - 1) % m_numImages];
-        m_fn.vkWaitForFences(device, 1, &prevFrameFence, VK_TRUE, UINT64_MAX);
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -262,8 +255,12 @@ namespace kuas
         submit.signalSemaphoreCount = 1;
         submit.pSignalSemaphores = &queueFinished;
 
-        m_fn.vkResetFences(device, 1, &frameFence);
-        m_fn.vkQueueSubmit(queue, 1, &submit, frameFence);
+        VkFence frameFence = m_frameFences[m_currentBackBuffer];
+        VkFence prevFrameFence = m_frameFences[(m_currentBackBuffer - 1) % m_numImages];
+
+        m_fn.vkWaitForFences(m_device, 1, &prevFrameFence, VK_TRUE, UINT64_MAX);
+        m_fn.vkResetFences(m_device, 1, &frameFence);
+        m_fn.vkQueueSubmit(m_presentQueue, 1, &submit, frameFence);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -273,7 +270,7 @@ namespace kuas
         presentInfo.pSwapchains = &m_swapchain;
         presentInfo.pImageIndices = &m_currentBackBuffer;
 
-        m_fn.vkQueuePresentKHR(queue, &presentInfo);
+        m_fn.vkQueuePresentKHR(m_presentQueue, &presentInfo);
 
         m_currentBackBuffer = (m_currentBackBuffer + 1) % m_numImages;
         return Result::Ok;
@@ -296,7 +293,6 @@ namespace kuas
     
     void SurfaceVK::init(VkSwapchainKHR swapchain)
     {
-        VkDevice device = m_parentDevice->getDevice();
         VkSurfaceCapabilitiesKHR surfCaps{};
 
         m_fn.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_parentDevice->getPhysicalDevice(), m_surface, &surfCaps);
@@ -322,17 +318,17 @@ namespace kuas
             swapchainInfo.clipped = VK_TRUE;
             swapchainInfo.oldSwapchain = m_swapchain;
 
-            VkResult result = m_fn.vkCreateSwapchainKHR(device, &swapchainInfo, nullptr, &newSwapchain);
+            VkResult result = m_fn.vkCreateSwapchainKHR(m_device, &swapchainInfo, nullptr, &newSwapchain);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
-            m_fn.vkDestroySwapchainKHR(device, m_swapchain, nullptr);
+            m_fn.vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
             m_swapchain = newSwapchain;
         }
 
-        VkResult result = m_fn.vkGetSwapchainImagesKHR(device, m_swapchain, &m_numImages, nullptr);
+        VkResult result = m_fn.vkGetSwapchainImagesKHR(m_device, m_swapchain, &m_numImages, nullptr);
         KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
-        result = m_fn.vkGetSwapchainImagesKHR(device, m_swapchain, &m_numImages, m_surfaceImages.data());
+        result = m_fn.vkGetSwapchainImagesKHR(m_device, m_swapchain, &m_numImages, m_surfaceImages.data());
         KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
         VkSemaphoreCreateInfo semaphoreInfo{};
@@ -351,7 +347,7 @@ namespace kuas
             cbInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
             cbInfo.commandBufferCount = m_numImages;
 
-            result = m_fn.vkAllocateCommandBuffers(device, &cbInfo, m_cmdBuffers.data());
+            result = m_fn.vkAllocateCommandBuffers(m_device, &cbInfo, m_cmdBuffers.data());
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
         }
 
@@ -359,25 +355,23 @@ namespace kuas
         m_surfaceHeight = surfCaps.maxImageExtent.height;
 
         for (uint32_t i = 0; i < m_numImages; i++) {
-            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_imageAcquiredSemaphores[i]);
+            result = m_fn.vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &m_imageAcquiredSemaphores[i]);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
-            result = m_fn.vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_queueFinishedSemaphores[i]);
+            result = m_fn.vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &m_queueFinishedSemaphores[i]);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
 
-            result = m_fn.vkCreateFence(device, &fenceInfo, nullptr, &m_frameFences[i]);
+            result = m_fn.vkCreateFence(m_device, &fenceInfo, nullptr, &m_frameFences[i]);
             KUAS_ASSERT(!KUAS_VULKAN_FAILED(result));
         }
     }
 
     void SurfaceVK::destroySwapchainObjects()
     {
-        VkDevice device = m_parentDevice->getDevice();
-
         for (uint32_t i = 0; i < m_numImages; i++) {
-            m_fn.vkDestroySemaphore(device, m_imageAcquiredSemaphores[i], nullptr);
-            m_fn.vkDestroySemaphore(device, m_queueFinishedSemaphores[i], nullptr);
-            m_fn.vkDestroyFence(device, m_frameFences[i], nullptr);
+            m_fn.vkDestroySemaphore(m_device, m_imageAcquiredSemaphores[i], nullptr);
+            m_fn.vkDestroySemaphore(m_device, m_queueFinishedSemaphores[i], nullptr);
+            m_fn.vkDestroyFence(m_device, m_frameFences[i], nullptr);
         }
     }
 }

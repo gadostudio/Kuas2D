@@ -1,8 +1,12 @@
 #version 450 core
 
+#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE) || defined(KUAS_ROUNDED_SHAPE)
+#define KUAS_USE_SDF
+#endif
+
 // from geometry shader
 layout(location = 0) in vec4 gs_col;
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE) || defined(KUAS_ROUNDED_SHAPE)
+#ifdef KUAS_USE_SDF
 layout(location = 1) in vec2 gs_size;
 layout(location = 2) in vec2 gs_pos;
 #endif
@@ -31,7 +35,7 @@ float sdfRoundedRect(in vec2 p, in vec2 size, in float roundness)
 
 void main()
 {
-#if defined(KUAS_ANTIALIAS) || !defined(KUAS_FILL_SHAPE) || defined(KUAS_ROUNDED_SHAPE)
+#ifdef KUAS_USE_SDF
 #ifdef KUAS_ROUNDED_SHAPE
     float round_factor = 0;
 #ifndef KUAS_FILL_SHAPE
@@ -41,9 +45,15 @@ void main()
 #else
     float d = sdfRect(gs_pos - gs_size, gs_size);
 #endif
+    float ddf = fwidth(d);
 #endif
 #ifndef KUAS_FILL_SHAPE
     d = abs(d) - gs_thickness;
+#endif
+
+#ifdef KUAS_USE_SDF
+    d -= 0.5;
+    d = d / ddf + 0.5;
 #endif
 
 #ifdef KUAS_ANTIALIAS

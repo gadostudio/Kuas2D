@@ -70,7 +70,7 @@ namespace kuas
 
     void DrawList::setLineThickness(float thickness)
     {
-        m_lineThickness = std::max(0.0f, thickness * 0.5f);
+        m_lineThickness = std::max(0.0f, (thickness - 1.0f) * 0.5f);
     }
 
     void DrawList::setLineColor(const ColorRGBA& color)
@@ -129,14 +129,6 @@ namespace kuas
         drawRoundedRect({ x, y, width, height }, roundness);
     }
 
-    void DrawList::drawTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)
-    {    
-    }    
-
-    void DrawList::drawQuad(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2, const Vec2F& p3)
-    {    
-    }    
-
     void DrawList::drawCircle(const Vec2F& centerPos, float radius)
     {
         flushCommands(PipelineID::Circle);
@@ -158,13 +150,44 @@ namespace kuas
         drawCircle(Vec2F(cx, cy), radius);
     }
 
-    void DrawList::drawLine(const Vec2F& p0, const Vec2F& p1)
+    void DrawList::drawArc(const Vec2F& centerPos, float startAngle, float endAngle, float radius)
     {
     }
 
-    void DrawList::drawLine(float x0, float y0, float x1, float y1)
+    void DrawList::drawArc(float cx, float cy, float startAngle, float endAngle, float radius)
     {
-        drawLine(Vec2F(x0, y0), Vec2F(x1, y1));
+    }
+
+    void DrawList::drawPie(const Vec2F& centerPos, float startAngle, float endAngle, float radius)
+    {
+    }
+
+    void DrawList::drawPie(float cx, float cy, float startAngle, float endAngle, float radius)
+    {
+    }
+
+    void DrawList::drawEllipse(const Vec2F& centerPos, float rx, float ry)
+    {
+    }
+
+    void DrawList::drawEllipse(float cx, float cy, float rx, float ry)
+    {
+    }
+
+    void DrawList::drawEllipticArc(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::drawEllipticArc(float cx, float cy, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::drawEllipticPie(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::drawEllipticPie(float cx, float cy, float startAngle, float endAngle, float rx, float ry)
+    {
     }
 
     void DrawList::fillRect(const Rect2F& rect)
@@ -211,14 +234,6 @@ namespace kuas
         fillRoundedRect({ x, y, width, height }, roundness);
     }
 
-    void DrawList::fillTriangle(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2)
-    {
-    }
-
-    void DrawList::fillQuad(const Vec2F& p0, const Vec2F& p1, const Vec2F& p2, const Vec2F& p3)
-    {
-    }
-
     void DrawList::fillCircle(const Vec2F& centerPos, float radius)
     {
         flushCommands(PipelineID::FillCircle);
@@ -237,6 +252,38 @@ namespace kuas
     void DrawList::fillCircle(float cx, float cy, float radius)
     {
         fillCircle(Vec2F(cx, cy), radius);
+    }
+
+    void DrawList::fillPie(const Vec2F& centerPos, float startAngle, float endAngle, float radius)
+    {
+    }
+
+    void DrawList::fillPie(float cx, float cy, float startAngle, float endAngle, float radius)
+    {
+    }
+
+    void DrawList::fillEllipse(const Vec2F& centerPos, float rx, float ry)
+    {
+    }
+
+    void DrawList::fillEllipse(float cx, float cy, float rx, float ry)
+    {
+    }
+
+    void DrawList::fillEllipticArc(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::fillEllipticArc(float cx, float cy, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::fillEllipticPie(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry)
+    {
+    }
+
+    void DrawList::fillEllipticPie(float cx, float cy, float startAngle, float endAngle, float rx, float ry)
+    {
     }
 
     void DrawList::endDrawPass()

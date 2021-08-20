@@ -15,7 +15,7 @@ layout(location = 2) out float gs_thickness;
 
 void main()
 {
-    gl_Position.xy = i_pos;
+    gl_Position.xy = i_pos + 0.5;
     gs_col = i_col;
     gs_radius = i_radius;
 #ifndef KUAS_FILL_SHAPE

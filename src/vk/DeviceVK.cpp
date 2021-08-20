@@ -433,6 +433,10 @@ namespace kuas
         VkPipelineStageFlags* waitStageDest = (VkPipelineStageFlags*)alloca(sizeof(VkPipelineStageFlags) * 64);
 
         for (uint32_t i = 0; i < numWaitSemaphores; i++) {
+            if (waitSemaphores[i] == nullptr) {
+                return Result::ErrInvalidArg;
+            }
+
             VkSemaphore semaphore = KUAS_PTR_CAST(SemaphoreVK, waitSemaphores[i])->m_semaphore;
             
             // flush wait semaphores when the queue is full

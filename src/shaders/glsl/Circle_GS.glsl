@@ -38,6 +38,8 @@ void main()
     b += vs_thickness[0];
 #endif
 
+    rad -= 0.5;
+
     // transform edges
     vec3 e0 = transform * vec3(a, 1.0);
     vec3 e1 = transform * vec3(b.x, a.y, 1.0);

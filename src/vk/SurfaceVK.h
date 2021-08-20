@@ -33,6 +33,8 @@ namespace kuas
         Image* getImage(uint32_t n) override;
 
     private:
+        VkDevice m_device;
+        VkQueue m_presentQueue;
         VkSurfaceKHR m_surface;
         VkSwapchainKHR m_swapchain;
         VkCommandPool m_cmdPool;

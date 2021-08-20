@@ -17,9 +17,12 @@ float sdfCircle(vec2 p, float radius)
 void main()
 {
     float d = sdfCircle(gs_pos - gs_radius, gs_radius);
+    float ddf = fwidth(d);
 #ifndef KUAS_FILL_SHAPE
     d = abs(d) - gs_thickness;
 #endif
+    d -= 0.5;
+    d = d / ddf + 0.5;
     d = clamp(d, 0.0, 1.0);
     o_col = gs_col;
 #ifdef KUAS_ANTIALIAS

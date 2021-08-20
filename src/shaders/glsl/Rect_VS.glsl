@@ -24,7 +24,7 @@ layout(push_constant, row_major) uniform PushConstants {
 
 void main()
 {
-    gl_Position = i_bbox;
+    gl_Position = i_bbox + 0.5;
     gs_col = i_col;
 #ifndef KUAS_FILL_SHAPE
     gs_thickness = i_thickness;

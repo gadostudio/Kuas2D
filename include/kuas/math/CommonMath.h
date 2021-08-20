@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 
 namespace kuas
 {
@@ -12,14 +13,14 @@ namespace kuas
     };
 
     template<typename T>
-    inline static T degreeToRadian(T degree)
+    inline static constexpr T degreeToRadian(T degree)
     {
         static constexpr T c = Constants<T>::PI / 180;
         return degree * c;
     }
 
     template<typename T>
-    inline static T radianToDegree(T radian)
+    inline static constexpr T radianToDegree(T radian)
     {
         static constexpr T c = 180 / Constants<T>::PI;
         return radian * c;
