@@ -274,6 +274,47 @@ namespace kuas
             colorBlendInfo);
     }
 
+    VkPipeline PipelineBuilderVK::buildFillEllipse()
+    {
+        VkPipelineLayout layout = m_device->getCommonPipelineLayout();
+        bool antialias = m_renderState.rasterizationState->antiAliasedFill;
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputInfo.vertexBindingDescriptionCount = KUAS_ARRAY_SIZE(FillEllipseVertexVK::bindings);
+        vertexInputInfo.pVertexBindingDescriptions = FillEllipseVertexVK::bindings;
+        vertexInputInfo.vertexAttributeDescriptionCount = KUAS_ARRAY_SIZE(FillEllipseVertexVK::attributes);
+        vertexInputInfo.pVertexAttributeDescriptions = FillEllipseVertexVK::attributes;
+
+        VkPipelineColorBlendAttachmentState blendAtt{};
+        blendAtt.blendEnable = VK_TRUE;
+        blendAtt.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        blendAtt.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        blendAtt.colorBlendOp = VK_BLEND_OP_ADD;
+        blendAtt.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        blendAtt.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        blendAtt.alphaBlendOp = VK_BLEND_OP_ADD;
+        blendAtt.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT |
+            VK_COLOR_COMPONENT_G_BIT |
+            VK_COLOR_COMPONENT_B_BIT |
+            VK_COLOR_COMPONENT_A_BIT;
+
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
+        colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        colorBlendInfo.attachmentCount = 1;
+        colorBlendInfo.pAttachments = &blendAtt;
+
+        return buildPipeline(
+            m_device->getShaderModule(ShaderModuleID::FillEllipse_VS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::FillEllipse_GS : ShaderModuleID::FillEllipseAA_GS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::FillCircleAA_PS : ShaderModuleID::FillCircle_PS),
+            layout,
+            pointListIA,
+            vertexInputInfo,
+            colorBlendInfo);
+    }
+
     VkPipeline PipelineBuilderVK::buildPipeline(
         VkShaderModule vs,
         VkShaderModule gs,

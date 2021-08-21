@@ -10,6 +10,7 @@ namespace kuas
         VkPipeline fillRectPipe,
         VkPipeline fillRoundedRectPipe,
         VkPipeline fillCirclePipe,
+        VkPipeline fillEllipsePipe,
         const ColorStateDesc& colorState,
         DeviceVK* parentDevice) :
         m_pipelines{},
@@ -22,6 +23,7 @@ namespace kuas
         m_pipelines[PipelineID::FillRect] = fillRectPipe;
         m_pipelines[PipelineID::FillRoundedRect] = fillRoundedRectPipe;
         m_pipelines[PipelineID::FillCircle] = fillCirclePipe;
+        m_pipelines[PipelineID::FillEllipse] = fillEllipsePipe;
     }
 
     RenderStateVK::~RenderStateVK()

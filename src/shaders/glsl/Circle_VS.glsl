@@ -8,17 +8,12 @@ layout(location = 3) in float i_thickness;
 #endif
 
 layout(location = 0) out vec4 gs_col;
-layout(location = 1) out float gs_radius;
-#ifndef KUAS_FILL_SHAPE
-layout(location = 2) out float gs_thickness;
-#endif
 
 void main()
 {
-    gl_Position.xy = i_pos + 0.5;
-    gs_col = i_col;
-    gs_radius = i_radius;
+    gl_Position.xyz = vec3(i_pos + 0.5, i_radius);
 #ifndef KUAS_FILL_SHAPE
-    gs_thickness = i_thickness;
+    gl_Position.w = i_thickness;
 #endif
+    gs_col = i_col;
 }

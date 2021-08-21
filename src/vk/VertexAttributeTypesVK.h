@@ -46,4 +46,10 @@ namespace kuas
         static const VkVertexInputBindingDescription bindings[1];
         static const VkVertexInputAttributeDescription attributes[3];
     };
+
+    struct FillEllipseVertexVK : public FillEllipseVertex
+    {
+        static const VkVertexInputBindingDescription bindings[1];
+        static const VkVertexInputAttributeDescription attributes[3];
+    };
 }

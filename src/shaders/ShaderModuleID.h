@@ -45,6 +45,12 @@ namespace kuas
             FillCircleAA_GS,
             FillCircleAA_PS,
 
+            FillEllipse_VS,
+            FillEllipse_GS,
+            FillEllipse_PS,
+            FillEllipseAA_GS,
+            FillEllipseAA_PS,
+
             Count
         };
     };

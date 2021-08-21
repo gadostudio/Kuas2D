@@ -28,7 +28,7 @@ namespace kuas
         void setViewport(const ViewportDesc& viewport);
         void setScissorRect(const Rect2I& rect);
         void setTransformation(const Mat3F& mat);
-        void setLineThickness(float thickness);
+        void setLineWidth(float width);
         void setLineColor(const ColorRGBA& color);
         void setFillColor(const ColorRGBA& color);
         void drawRect(const Rect2F& rect);

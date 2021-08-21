@@ -13,7 +13,7 @@ namespace kuas
             FillRect,
             FillRoundedRect,
             FillCircle,
-            FillTriangle,
+            FillEllipse,
 
             Count
         };

@@ -68,9 +68,9 @@ namespace kuas
         m_transformMatUpdated = true;
     }
 
-    void DrawList::setLineThickness(float thickness)
+    void DrawList::setLineWidth(float width)
     {
-        m_lineThickness = std::max(0.0f, (thickness - 1.0f) * 0.5f);
+        m_lineThickness = std::max(0.0f, (width - 1.0f) * 0.5f);
     }
 
     void DrawList::setLineColor(const ColorRGBA& color)
@@ -264,10 +264,23 @@ namespace kuas
 
     void DrawList::fillEllipse(const Vec2F& centerPos, float rx, float ry)
     {
+        flushCommands(PipelineID::FillEllipse);
+
+        FillEllipseVertex* vtx = reinterpret_cast<FillEllipseVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+        vtx->pos.x = centerPos.x;
+        vtx->pos.y = centerPos.y;
+        vtx->radius.x = rx;
+        vtx->radius.y = ry;
+        vtx->col = m_fillColor;
+
+        m_vtxCurrentWriteOffset += sizeof(FillEllipseVertex);
+        m_vtxDrawSize += sizeof(FillEllipseVertex);
+        m_vtxDrawCount++;
     }
 
     void DrawList::fillEllipse(float cx, float cy, float rx, float ry)
     {
+        fillEllipse(kuas::Vec2F(cx, cy), rx, ry);
     }
 
     void DrawList::fillEllipticArc(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry)

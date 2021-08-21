@@ -23,6 +23,7 @@ namespace kuas
         VkPipeline buildFillRoundedRect();
         VkPipeline buildCircle();
         VkPipeline buildFillCircle();
+        VkPipeline buildFillEllipse();
 
     private:
         VkRenderPass m_renderPass;

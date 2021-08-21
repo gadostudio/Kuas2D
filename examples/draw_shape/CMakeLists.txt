@@ -1,2 +1,0 @@
-add_executable(draw_shape DrawShape.cpp)
-target_link_libraries(draw_shape PRIVATE ks_app)

@@ -57,4 +57,11 @@ namespace kuas
         ColorRGBA col;
         float radius;
     };
+
+    struct FillEllipseVertex
+    {
+        Vec2F pos;
+        Vec2F radius;
+        ColorRGBA col;
+    };
 }

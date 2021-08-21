@@ -1,0 +1,2 @@
+add_executable(example_basic Basic.cpp)
+target_link_libraries(example_basic PRIVATE ks_app)
