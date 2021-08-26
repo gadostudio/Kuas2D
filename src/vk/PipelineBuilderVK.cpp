@@ -352,8 +352,8 @@ namespace kuas
 
         return buildPipeline(
             m_device->getShaderModule(ShaderModuleID::LineSegment_VS),
-            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegment_GS : ShaderModuleID::LineSegment_GS),
-            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegment_FS : ShaderModuleID::LineSegment_FS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegmentAA_GS : ShaderModuleID::LineSegment_GS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegmentAA_FS : ShaderModuleID::LineSegment_FS),
             layout,
             inputAssemblyInfo,
             vertexInputInfo,

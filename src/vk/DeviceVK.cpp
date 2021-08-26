@@ -958,6 +958,8 @@ namespace kuas
 #include "../shaders/LineSegment_VS.h"
 #include "../shaders/LineSegment_GS.h"
 #include "../shaders/LineSegment_FS.h"
+#include "../shaders/LineSegmentAA_GS.h"
+#include "../shaders/LineSegmentAA_FS.h"
 
     void DeviceVK::initShaderModule()
     {
@@ -1068,6 +1070,12 @@ namespace kuas
 
         m_shaderModules[ShaderModuleID::LineSegment_FS] =
             createShaderModule(sizeof(ShaderLineSegment_FS), ShaderLineSegment_FS);
+
+        m_shaderModules[ShaderModuleID::LineSegmentAA_GS] =
+            createShaderModule(sizeof(ShaderLineSegmentAA_GS), ShaderLineSegmentAA_GS);
+
+        m_shaderModules[ShaderModuleID::LineSegmentAA_FS] =
+            createShaderModule(sizeof(ShaderLineSegmentAA_FS), ShaderLineSegmentAA_FS);
     }
 
 #ifdef KUAS_USE_SDL

@@ -54,7 +54,6 @@ void main()
 #endif
 
 #ifdef KUAS_USE_SDF
-    //d = clamp(d / ddf + 0.5, 0.0, 1.0);
     d = clamp(smoothstep(0.5 - ddf, 0.5 + ddf, d), 0.0, 1.0);
 #endif
 
