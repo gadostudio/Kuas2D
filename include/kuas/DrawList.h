@@ -47,6 +47,7 @@ namespace kuas
         void drawEllipticArc(float cx, float cy, float startAngle, float endAngle, float rx, float ry);
         void drawEllipticPie(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry);
         void drawEllipticPie(float cx, float cy, float startAngle, float endAngle, float rx, float ry);
+        void drawLine(const Vec2F& p0, const Vec2F& p1);
         void fillRect(const Rect2F& rect);
         void fillRect(float x, float y, float width, float height);
         void fillRoundedRect(const Rect2F& rect, float roundness);
@@ -72,7 +73,7 @@ namespace kuas
         RenderState*    m_currentRenderState;
         ViewportDesc    m_viewport;
         Rect2I          m_scissorRect;
-        float           m_lineThickness;
+        float           m_lineWidth;
         ColorRGBA       m_lineColor;
         ColorRGBA       m_fillColor;
         Mat3F           m_transform;

@@ -180,6 +180,9 @@ namespace kuas
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
+        VkFence prevFrameFence = m_frameFences[(m_currentBackBuffer - 1) % m_numImages];
+        m_fn.vkWaitForFences(m_device, 1, &prevFrameFence, VK_TRUE, UINT64_MAX);
+
         m_fn.vkBeginCommandBuffer(cb, &beginInfo);
         {
             VkImage srcImage = m_images[m_currentBackBuffer]->m_image;
@@ -256,9 +259,7 @@ namespace kuas
         submit.pSignalSemaphores = &queueFinished;
 
         VkFence frameFence = m_frameFences[m_currentBackBuffer];
-        VkFence prevFrameFence = m_frameFences[(m_currentBackBuffer - 1) % m_numImages];
-
-        m_fn.vkWaitForFences(m_device, 1, &prevFrameFence, VK_TRUE, UINT64_MAX);
+        
         m_fn.vkResetFences(m_device, 1, &frameFence);
         m_fn.vkQueueSubmit(m_presentQueue, 1, &submit, frameFence);
 

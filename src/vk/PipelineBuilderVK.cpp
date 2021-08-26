@@ -315,6 +315,51 @@ namespace kuas
             colorBlendInfo);
     }
 
+    VkPipeline PipelineBuilderVK::buildLineSegment()
+    {
+        VkPipelineLayout layout = m_device->getCommonPipelineLayout();
+        bool antialias = m_renderState.rasterizationState->antiAliasedFill;
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+        inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputInfo.vertexBindingDescriptionCount = KUAS_ARRAY_SIZE(LineSegmentVertexVK::bindings);
+        vertexInputInfo.pVertexBindingDescriptions = LineSegmentVertexVK::bindings;
+        vertexInputInfo.vertexAttributeDescriptionCount = KUAS_ARRAY_SIZE(LineSegmentVertexVK::attributes);
+        vertexInputInfo.pVertexAttributeDescriptions = LineSegmentVertexVK::attributes;
+
+        VkPipelineColorBlendAttachmentState blendAtt{};
+        blendAtt.blendEnable = VK_TRUE;
+        blendAtt.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        blendAtt.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        blendAtt.colorBlendOp = VK_BLEND_OP_ADD;
+        blendAtt.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        blendAtt.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        blendAtt.alphaBlendOp = VK_BLEND_OP_ADD;
+        blendAtt.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT |
+            VK_COLOR_COMPONENT_G_BIT |
+            VK_COLOR_COMPONENT_B_BIT |
+            VK_COLOR_COMPONENT_A_BIT;
+
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
+        colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        colorBlendInfo.attachmentCount = 1;
+        colorBlendInfo.pAttachments = &blendAtt;
+
+        return buildPipeline(
+            m_device->getShaderModule(ShaderModuleID::LineSegment_VS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegment_GS : ShaderModuleID::LineSegment_GS),
+            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegment_FS : ShaderModuleID::LineSegment_FS),
+            layout,
+            inputAssemblyInfo,
+            vertexInputInfo,
+            colorBlendInfo);
+    }
+
     VkPipeline PipelineBuilderVK::buildPipeline(
         VkShaderModule vs,
         VkShaderModule gs,
@@ -330,7 +375,7 @@ namespace kuas
             VK_DYNAMIC_STATE_BLEND_CONSTANTS
         };
 
-        static const auto dynamicStateInfo = [&]() -> const VkPipelineDynamicStateCreateInfo {
+        static const auto dynamicStateInfo = [&]() -> const auto {
             VkPipelineDynamicStateCreateInfo ret{};
             ret.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
             ret.dynamicStateCount = KUAS_ARRAY_SIZE(dynamicStates);
@@ -338,7 +383,7 @@ namespace kuas
             return ret;
         }();
 
-        static const auto viewportInfo = [&]() -> const VkPipelineViewportStateCreateInfo {
+        static const auto viewportInfo = [&]() -> const auto {
             VkPipelineViewportStateCreateInfo ret{};
             ret.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
             ret.viewportCount = 1;
@@ -348,7 +393,7 @@ namespace kuas
             return ret;
         }();
 
-        static const auto rasterizationInfo = [&]() -> const VkPipelineRasterizationStateCreateInfo {
+        static const auto rasterizationInfo = [&]() -> const auto {
             VkPipelineRasterizationStateCreateInfo ret{};
             ret.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
             ret.polygonMode = VK_POLYGON_MODE_FILL;
@@ -358,7 +403,7 @@ namespace kuas
             return ret;
         }();
 
-        static const auto multisampleInfo = [&]() -> const VkPipelineMultisampleStateCreateInfo {
+        static const auto multisampleInfo = [&]() -> const auto {
             VkPipelineMultisampleStateCreateInfo ret{};
             ret.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
             ret.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;

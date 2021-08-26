@@ -35,6 +35,7 @@ float sdfRoundedRect(in vec2 p, in vec2 size, in float roundness)
 
 void main()
 {
+    const float sq2_2 = sqrt(2.) / 2.;
 #ifdef KUAS_USE_SDF
 #ifdef KUAS_ROUNDED_SHAPE
     float round_factor = 0;
@@ -45,23 +46,24 @@ void main()
 #else
     float d = sdfRect(gs_pos - gs_size, gs_size);
 #endif
-    float ddf = fwidth(d);
+    float ddf = sq2_2 * length(vec2(dFdx(d), dFdy(d)));
 #endif
+
 #ifndef KUAS_FILL_SHAPE
     d = abs(d) - gs_thickness;
 #endif
 
 #ifdef KUAS_USE_SDF
-    d -= 0.5;
-    d = d / ddf + 0.5;
+    //d = clamp(d / ddf + 0.5, 0.0, 1.0);
+    d = clamp(smoothstep(0.5 - ddf, 0.5 + ddf, d), 0.0, 1.0);
 #endif
 
-#ifdef KUAS_ANTIALIAS
-    o_col = vec4(gs_col.rgb, gs_col.a * clamp(1.0 - d, 0.0, 1.0));
-#else
     o_col = gs_col;
+#ifdef KUAS_ANTIALIAS
+    o_col.a *= 1.0 - d;
+#else
 #if !defined(KUAS_FILL_SHAPE) || defined(KUAS_ROUNDED_SHAPE)
-    o_col.a *= step(0.5, clamp(1.0 - d, 0.0, 1.0));
+    o_col.a *= step(0.5, 1.0 - d);
 #endif
 #endif
 }

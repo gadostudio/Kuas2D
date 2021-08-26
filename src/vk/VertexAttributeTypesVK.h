@@ -52,4 +52,10 @@ namespace kuas
         static const VkVertexInputBindingDescription bindings[1];
         static const VkVertexInputAttributeDescription attributes[3];
     };
+
+    struct LineSegmentVertexVK : public LineSegmentVertex
+    {
+        static const VkVertexInputBindingDescription bindings[1];
+        static const VkVertexInputAttributeDescription attributes[3];
+    };
 }

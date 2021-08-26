@@ -24,6 +24,7 @@ namespace kuas
         VkPipeline buildCircle();
         VkPipeline buildFillCircle();
         VkPipeline buildFillEllipse();
+        VkPipeline buildLineSegment();
 
     private:
         VkRenderPass m_renderPass;

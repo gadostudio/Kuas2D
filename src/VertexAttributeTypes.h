@@ -64,4 +64,11 @@ namespace kuas
         Vec2F radius;
         ColorRGBA col;
     };
+
+    struct LineSegmentVertex
+    {
+        Vec2F pos;
+        ColorRGBA col;
+        float width;
+    };
 }

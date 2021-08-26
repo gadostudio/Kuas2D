@@ -10,6 +10,7 @@ namespace kuas
             Rect,
             RoundedRect,
             Circle,
+            LineSegment,
             FillRect,
             FillRoundedRect,
             FillCircle,

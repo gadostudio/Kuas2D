@@ -5,6 +5,7 @@ layout(triangle_strip, max_vertices = 4) out;
 
 layout(location = 0) in vec4 vs_col[];
 
+// We gonna reuse the circle shader
 layout(location = 0) out vec2 fs_pos;
 layout(location = 1) out vec4 fs_col;
 layout(location = 2) out float fs_radius;

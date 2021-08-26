@@ -50,7 +50,10 @@ REM Fill ellipse
 
 glslangValidator --target-env vulkan1.0 -S vert -DKUAS_FILL_SHAPE --vn ShaderFillEllipse_VS -o FillEllipse_VS.h glsl/FillEllipse_VS.glsl
 glslangValidator --target-env vulkan1.0 -S geom -DKUAS_FILL_SHAPE --vn ShaderFillEllipse_GS -o FillEllipse_GS.h glsl/FillEllipse_GS.glsl
-REM glslangValidator --target-env vulkan1.0 -S frag -DKUAS_FILL_SHAPE --vn ShaderFillEllipse_FS -o FillEllipse_FS.h glsl/FillEllipse_FS.glsl
 
 glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE --vn ShaderFillEllipseAA_GS -o FillEllipseAA_GS.h glsl/FillEllipse_GS.glsl
-REM glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS -DKUAS_FILL_SHAPE --vn ShaderFillEllipseAA_FS -o FillEllipseAA_FS.h glsl/FillEllipse_FS.glsl
+
+REM Line segment
+glslangValidator --target-env vulkan1.0 -S vert --vn ShaderLineSegment_VS -o LineSegment_VS.h glsl/LineSegment_VS.glsl
+glslangValidator --target-env vulkan1.0 -S geom --vn ShaderLineSegment_GS -o LineSegment_GS.h glsl/LineSegment_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag --vn ShaderLineSegment_FS -o LineSegment_FS.h glsl/LineSegment_FS.glsl

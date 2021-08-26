@@ -21,6 +21,7 @@ namespace kuas
             VkPipeline fillRoundedRectPipe,
             VkPipeline fillCirclePipe,
             VkPipeline fillEllipsePipe,
+            VkPipeline lineSegmentPipe,
             const ColorStateDesc& colorState,
             DeviceVK* parentDevice);
 

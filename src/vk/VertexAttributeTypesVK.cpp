@@ -97,4 +97,16 @@ namespace kuas
         { 1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(FillEllipseVertexVK, radius) },
         { 2, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(FillEllipseVertexVK, col) }
     };
+
+    //
+
+    const VkVertexInputBindingDescription LineSegmentVertexVK::bindings[1] = {
+        { 0, sizeof(LineSegmentVertexVK), VK_VERTEX_INPUT_RATE_VERTEX }
+    };
+
+    const VkVertexInputAttributeDescription LineSegmentVertexVK::attributes[3] = {
+        { 0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(LineSegmentVertexVK, pos) },
+        { 1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(LineSegmentVertexVK, col) },
+        { 2, 0, VK_FORMAT_R32_SFLOAT, offsetof(LineSegmentVertexVK, width) }
+    };
 }

@@ -58,10 +58,11 @@ public:
             drawLists[i]->begin();
             drawLists[i]->beginDrawPass(getSurfaceDrawPass().get(), getSurfaceRenderTarget(i).get(), &color);
             drawLists[i]->setRenderState(renderState.get());
-            drawLists[i]->setLineWidth(1.0f);
             drawLists[i]->setViewport(viewport);
             drawLists[i]->setScissorRect(scissor);
-
+            drawLists[i]->setLineWidth(1.0f);
+            drawLists[i]->setTransformation(kuas::scale(1.0f, 5.0f));
+            //drawLists[i]->setTransformation(kuas::translate(50.0f, 0.0f) * kuas::rotate(kuas::degreeToRadian(10.0f)));
             drawLists[i]->drawRect({ 20.0f, 20.0f, 50.0f, 50.0f });
             drawLists[i]->drawRoundedRect({ 20.0f, 75.0f, 50.0f, 50.0f }, 10.0f);
             drawLists[i]->drawCircle(kuas::Vec2F(45.0f, 155.0f), 25.0f);
@@ -69,6 +70,13 @@ public:
             drawLists[i]->fillRoundedRect({ 75.0f, 75.0f, 50.0f, 50.0f }, 10.0f);
             drawLists[i]->fillCircle(kuas::Vec2F(100.0f, 155.0f), 25.0f);
             drawLists[i]->fillEllipse(kuas::Vec2F(155.0f, 100.0f), 25.0f, 80.0f);
+            
+            for (int j = 0; j < 10; j++) {
+                float f = static_cast<float>(j) * 20.0f;
+                float w = static_cast<float>(j) * 0.5f;
+                drawLists[i]->setLineWidth(w);
+                drawLists[i]->drawLine(kuas::Vec2F(200.0f + f, 180.0f), kuas::Vec2F(220.0f + f, 20.0f));
+            }
 
             drawLists[i]->endDrawPass();
             drawLists[i]->end();

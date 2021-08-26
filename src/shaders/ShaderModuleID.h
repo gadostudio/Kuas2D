@@ -51,6 +51,10 @@ namespace kuas
             FillEllipseAA_GS,
             FillEllipseAA_PS,
 
+            LineSegment_VS,
+            LineSegment_GS,
+            LineSegment_FS,
+
             Count
         };
     };

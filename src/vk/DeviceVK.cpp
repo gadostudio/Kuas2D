@@ -233,6 +233,9 @@ namespace kuas
         VkPipeline fillEllipse = builder.buildFillEllipse();
         KUAS_ASSERT(fillEllipse != nullptr && "Failed to create graphics pipeline");
 
+        VkPipeline lineSegment = builder.buildLineSegment();
+        KUAS_ASSERT(lineSegment != nullptr && "Failed to create graphics pipeline");
+
         *renderState = new RenderStateVK(
             rect,
             roundedRect,
@@ -241,6 +244,7 @@ namespace kuas
             fillRoundedRect,
             fillCircle,
             fillEllipse,
+            lineSegment,
             ColorStateDesc{},
             this);
 
@@ -951,6 +955,9 @@ namespace kuas
 #include "../shaders/FillEllipse_VS.h"
 #include "../shaders/FillEllipse_GS.h"
 #include "../shaders/FillEllipseAA_GS.h"
+#include "../shaders/LineSegment_VS.h"
+#include "../shaders/LineSegment_GS.h"
+#include "../shaders/LineSegment_FS.h"
 
     void DeviceVK::initShaderModule()
     {
@@ -1052,6 +1059,15 @@ namespace kuas
 
         m_shaderModules[ShaderModuleID::FillEllipseAA_GS] =
             createShaderModule(sizeof(ShaderFillEllipseAA_GS), ShaderFillEllipseAA_GS);
+
+        m_shaderModules[ShaderModuleID::LineSegment_VS] = 
+            createShaderModule(sizeof(ShaderLineSegment_VS), ShaderLineSegment_VS);
+
+        m_shaderModules[ShaderModuleID::LineSegment_GS] =
+            createShaderModule(sizeof(ShaderLineSegment_GS), ShaderLineSegment_GS);
+
+        m_shaderModules[ShaderModuleID::LineSegment_FS] =
+            createShaderModule(sizeof(ShaderLineSegment_FS), ShaderLineSegment_FS);
     }
 
 #ifdef KUAS_USE_SDL

@@ -10,7 +10,7 @@ namespace kuas
         m_viewport(),
         m_scissorRect(),
         m_transform(),
-        m_lineThickness(0.0f),
+        m_lineWidth(0.0f),
         m_lineColor(0.0f),
         m_fillColor(0.0f),
         m_viewportUpdated(false),
@@ -70,7 +70,7 @@ namespace kuas
 
     void DrawList::setLineWidth(float width)
     {
-        m_lineThickness = std::max(0.0f, (width - 1.0f) * 0.5f);
+        m_lineWidth = std::max(0.0f, (width - 1.0f) * 0.5f);
     }
 
     void DrawList::setLineColor(const ColorRGBA& color)
@@ -94,7 +94,7 @@ namespace kuas
         vtx->posMax.x = rect.x + rect.width;
         vtx->posMax.y = rect.y + rect.height;
         vtx->col = m_lineColor;
-        vtx->thickness = m_lineThickness;
+        vtx->thickness = m_lineWidth;
 
         m_vtxCurrentWriteOffset += sizeof(RectVertex);
         m_vtxDrawSize += sizeof(RectVertex);
@@ -108,6 +108,11 @@ namespace kuas
 
     void DrawList::drawRoundedRect(const Rect2F& rect, float roundness)
     {
+        if (roundness < 1.0f) {
+            drawRect(rect);
+            return;
+        }
+
         flushCommands(PipelineID::RoundedRect);
 
         RoundedRectVertex* vtx = reinterpret_cast<RoundedRectVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
@@ -116,7 +121,7 @@ namespace kuas
         vtx->posMax.x = rect.x + rect.width;
         vtx->posMax.y = rect.y + rect.height;
         vtx->col = m_lineColor;
-        vtx->thickness = m_lineThickness;
+        vtx->thickness = m_lineWidth;
         vtx->roundness = roundness;
 
         m_vtxCurrentWriteOffset += sizeof(RoundedRectVertex);
@@ -138,7 +143,7 @@ namespace kuas
         vtx->pos.y = centerPos.y;
         vtx->col = m_lineColor;
         vtx->radius = radius;
-        vtx->thickness = m_lineThickness;
+        vtx->thickness = m_lineWidth;
 
         m_vtxCurrentWriteOffset += sizeof(CircleVertex);
         m_vtxDrawSize += sizeof(CircleVertex);
@@ -188,6 +193,27 @@ namespace kuas
 
     void DrawList::drawEllipticPie(float cx, float cy, float startAngle, float endAngle, float rx, float ry)
     {
+    }
+
+    void DrawList::drawLine(const Vec2F& p0, const Vec2F& p1)
+    {
+        flushCommands(PipelineID::LineSegment);
+
+        LineSegmentVertex* vtx = reinterpret_cast<LineSegmentVertex*>((char*)m_mappedVtxBuffer + m_vtxCurrentWriteOffset);
+
+        vtx[0].pos.x = p0.x;
+        vtx[0].pos.y = p0.y;
+        vtx[0].col = m_lineColor;
+        vtx[0].width = m_lineWidth;
+
+        vtx[1].pos.x = p1.x;
+        vtx[1].pos.y = p1.y;
+        vtx[1].col = m_lineColor;
+        vtx[1].width = m_lineWidth;
+
+        m_vtxCurrentWriteOffset += sizeof(LineSegmentVertex) * 2;
+        m_vtxDrawSize += sizeof(LineSegmentVertex) * 2;
+        m_vtxDrawCount += 2;
     }
 
     void DrawList::fillRect(const Rect2F& rect)
