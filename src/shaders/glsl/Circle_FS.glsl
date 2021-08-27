@@ -16,13 +16,13 @@ float sdfCircle(vec2 p, float radius)
 
 void main()
 {
-    const float sq2_2 = sqrt(2.) / 2.;
     float d = sdfCircle(gs_pos - gs_radius, gs_radius);
-    float ddf = sq2_2 * length(vec2(dFdx(d), dFdy(d)));
+    float ddf = length(vec2(dFdx(d), dFdy(d)));
 #ifndef KUAS_FILL_SHAPE
     d = abs(d) - gs_thickness;
 #endif
-    d = clamp(smoothstep(0.5 - ddf, 0.5 + ddf, d), 0.0, 1.0);
+    d -= 0.5;
+    d = clamp(d / ddf + 0.5, 0.0, 1.0);
     o_col = gs_col;
 #ifdef KUAS_ANTIALIAS
     o_col.a *= 1.0 - d;

@@ -318,7 +318,7 @@ namespace kuas
     VkPipeline PipelineBuilderVK::buildLineSegment()
     {
         VkPipelineLayout layout = m_device->getCommonPipelineLayout();
-        bool antialias = m_renderState.rasterizationState->antiAliasedFill;
+        bool antialias = m_renderState.rasterizationState->antiAliasedLine;
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
         inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
