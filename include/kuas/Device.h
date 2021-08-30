@@ -5,7 +5,7 @@
 #include "Image.h"
 #include "DrawPass.h"
 #include "RenderState.h"
-#include "RenderTarget.h"
+#include "Canvas.h"
 #include "DrawList.h"
 #include "SyncObjects.h"
 #include "Surface.h"
@@ -21,32 +21,41 @@ namespace kuas
         /**
             Creates bitmap.
             
-            Bitmap is a 2-dimensional array data which can be used for sending and reading pixel data to/from GPU. 
-            Bitmap is CPU-only storage. Thus, its memory can be mapped and CPU can directly read and write
-            pixel data.
+            Bitmap is a 2-dimensional array data which can be used to store pixel data. 
+            Bitmap is CPU-only storage. Thus, Bitmap memory can be mapped and accessed by CPU.
          */
         virtual Result createBitmap(const BitmapCreateDesc& desc, Bitmap** bitmap) = 0;
         
         /**
             Creates image.
             
-            Image is a 2-dimensional array data which can be used for reading and writting pixel data on GPU.
-            Image is GPU-only storage. Thus, CPU cannot read and write pixel data directly through Image.
+            Image is a 2-dimensional array data which can be used for reading or writting pixel data on GPU.
+            Image is GPU-only storage. Thus, CPU cannot access its memory directly.
          */
         virtual Result createImage(const ImageCreateDesc& desc, Image** image) = 0;
         
         virtual Result createPathBuffer() = 0;
         
+        /**
+            Creates draw pass.
+
+            Draw Pass describes the use of Canvas used for painting.
+         */
         virtual Result createDrawPass(const DrawPassCreateDesc& desc, DrawPass** drawPass) = 0;
         
         virtual Result createRenderState(DrawPass* drawPass, const RenderStateCreateDesc& desc, RenderState** renderState) = 0;
         
-        virtual Result createRenderTarget(
+        /**
+            Creates canvas.
+
+            Canvas is a collection of Image attachment used for painting.
+         */
+        virtual Result createCanvas(
             DrawPass* drawPass,
             Image* imageBinding,
             uint32_t width,
             uint32_t height,
-            RenderTarget** renderTarget) = 0;
+            Canvas** canvas) = 0;
 
         virtual Result createDrawList(DrawList** drawList) = 0;
 

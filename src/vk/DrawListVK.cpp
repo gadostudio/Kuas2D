@@ -2,7 +2,7 @@
 #include "DrawListVK.h"
 #include "DeviceVK.h"
 #include "DrawPassVK.h"
-#include "RenderTargetVK.h"
+#include "CanvasVK.h"
 #include "RenderStateVK.h"
 #include "DrawParamVK.h"
 #include "../PipelineID.h"
@@ -46,6 +46,8 @@ namespace kuas
             m_vtxBufferAlloc,
         };
 
+        DrawList::end();
+
         vmaFlushAllocations(m_allocator, 2, allocations, nullptr, nullptr);
         vmaInvalidateAllocations(m_allocator, 2, allocations, nullptr, nullptr);
         vmaUnmapMemory(m_allocator, allocations[0]);
@@ -72,23 +74,23 @@ namespace kuas
 
         for (const auto& cmd : m_commandList) {
             switch (cmd.type) {
-                case CommandType::CmdBeginDrawPass: {
-                    const CmdBeginDrawPassArgs& beginDrawPass = cmd.cmdBeginDrawPass;
+                case CommandType::CmdBeginPaint: {
+                    const CmdBeginPaintArgs& beginPaintArgs = cmd.cmdBeginPaint;
 
                     VkClearValue clearColor{};
-                    clearColor.color.float32[0] = beginDrawPass.clearValue.r;
-                    clearColor.color.float32[1] = beginDrawPass.clearValue.g;
-                    clearColor.color.float32[2] = beginDrawPass.clearValue.b;
-                    clearColor.color.float32[3] = beginDrawPass.clearValue.a;
+                    clearColor.color.float32[0] = beginPaintArgs.clearValue.r;
+                    clearColor.color.float32[1] = beginPaintArgs.clearValue.g;
+                    clearColor.color.float32[2] = beginPaintArgs.clearValue.b;
+                    clearColor.color.float32[3] = beginPaintArgs.clearValue.a;
 
                     VkRenderPassBeginInfo rpBegin{};
                     rpBegin.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-                    rpBegin.renderPass = KUAS_PTR_CAST(DrawPassVK, beginDrawPass.drawPass)->getHandle();
-                    rpBegin.framebuffer = KUAS_PTR_CAST(RenderTargetVK, beginDrawPass.renderTarget)->getHandle();
+                    rpBegin.renderPass = KUAS_PTR_CAST(DrawPassVK, beginPaintArgs.drawPass)->getHandle();
+                    rpBegin.framebuffer = KUAS_PTR_CAST(CanvasVK, beginPaintArgs.canvas)->getHandle();
                     rpBegin.renderArea.offset.x = 0;
                     rpBegin.renderArea.offset.y = 0;
-                    rpBegin.renderArea.extent.width = beginDrawPass.renderTarget->getWidth();
-                    rpBegin.renderArea.extent.height = beginDrawPass.renderTarget->getHeight();
+                    rpBegin.renderArea.extent.width = beginPaintArgs.canvas->getWidth();
+                    rpBegin.renderArea.extent.height = beginPaintArgs.canvas->getHeight();
                     rpBegin.clearValueCount = 1;
                     rpBegin.pClearValues = &clearColor;
 
@@ -217,7 +219,7 @@ namespace kuas
 
                     break;
                 }
-                case CommandType::CmdEndDrawPass: {
+                case CommandType::CmdEndPaint: {
                     m_fn.vkCmdEndRenderPass(cmdBuffer);
                     break;
                 }

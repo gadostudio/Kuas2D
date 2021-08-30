@@ -21,7 +21,6 @@ void main()
     vec2 a = gl_in[0].gl_Position.xy;
     vec2 b = gl_in[1].gl_Position.xy;
     float w_a = gl_in[0].gl_Position.z;
-    float w_b = gl_in[1].gl_Position.z;
     float w = w_a * 2.0 + 1.0;
 
 #ifdef KUAS_ANTIALIAS

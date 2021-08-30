@@ -18,8 +18,8 @@ namespace ks_app
         uint32_t getNumSurfaceImages() { return m_surface->getNumImages(); }
         uint32_t getCurrentBackBuffer() { return m_surface->getCurrentBackBuffer(); }
         kuas::Ref<kuas::DrawPass>& getSurfaceDrawPass() { return m_drawPass; }
-        kuas::Ref<kuas::Image>& getSurfaceImage(uint32_t n) { return m_frameData[n].renderTargetImage; }
-        kuas::Ref<kuas::RenderTarget>& getSurfaceRenderTarget(uint32_t n) { return m_frameData[n].renderTarget; }
+        kuas::Ref<kuas::Image>& getSurfaceImage(uint32_t n) { return m_frameData[n].surfaceImage; }
+        kuas::Ref<kuas::Canvas>& getSurfaceCanvas(uint32_t n) { return m_frameData[n].canvas; }
 
         static App* create(int argc, const char** argv);
 
@@ -29,8 +29,8 @@ namespace ks_app
 
         struct FrameData
         {
-            kuas::Ref<kuas::Image> renderTargetImage;
-            kuas::Ref<kuas::RenderTarget> renderTarget;
+            kuas::Ref<kuas::Image> surfaceImage;
+            kuas::Ref<kuas::Canvas> canvas;
             kuas::Ref<kuas::Semaphore> renderFinishedSemaphore;
         };
 

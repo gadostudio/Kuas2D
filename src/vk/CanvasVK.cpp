@@ -1,9 +1,9 @@
-#include "RenderTargetVK.h"
+#include "CanvasVK.h"
 #include "DeviceVK.h"
 
 namespace kuas
 {
-    RenderTargetVK::RenderTargetVK(
+    CanvasVK::CanvasVK(
         VkFramebuffer framebuffer,
         uint32_t width, uint32_t height,
         DeviceVK* parentDevice) :
@@ -14,7 +14,7 @@ namespace kuas
     {
     }
 
-    RenderTargetVK::~RenderTargetVK()
+    CanvasVK::~CanvasVK()
     {
         m_parentDevice->getFunc().vkDestroyFramebuffer(
             m_parentDevice->getDevice(), m_framebuffer, nullptr);

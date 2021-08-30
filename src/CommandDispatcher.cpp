@@ -23,20 +23,20 @@ namespace kuas
         m_idxDrawOffset = 0;
     }
 
-    void CommandDispatcher::beginDrawPass(
+    void CommandDispatcher::beginPaint(
         DrawPass* drawPass,
-        RenderTarget* renderTarget,
+        Canvas* canvas,
         const ColorRGBA* clearValue)
     {
-        m_commandList.beginDrawPass(drawPass, renderTarget, clearValue);
-        DrawList::beginDrawPass(drawPass, renderTarget, clearValue);
+        m_commandList.beginPaint(drawPass, canvas, clearValue);
+        DrawList::beginPaint(drawPass, canvas, clearValue);
     }
 
-    void CommandDispatcher::endDrawPass()
+    void CommandDispatcher::endPaint()
     {
         flushCommands(PipelineID::Unknown); // make sure all commands are completely flushed
-        DrawList::endDrawPass();
-        m_commandList.endDrawPass();
+        DrawList::endPaint();
+        m_commandList.endPaint();
     }
 
     void CommandDispatcher::blitImage(Image* srcImage, const Rect2F& srcRect, Image* dstImage, const Rect2F& dstRect)

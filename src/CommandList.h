@@ -3,7 +3,7 @@
 #include <kuas/Types.h>
 #include <kuas/RefCount.h>
 #include <kuas/DrawPass.h>
-#include <kuas/RenderTarget.h>
+#include <kuas/Canvas.h>
 #include <kuas/RenderState.h>
 #include <kuas/math/Mat3.h>
 
@@ -13,23 +13,23 @@ namespace kuas
 {
     enum class CommandType
     {
-        CmdBeginDrawPass,
+        CmdBeginPaint,
         CmdSetViewport,
         CmdSetScissorRect,
         CmdSetTransformation,
         CmdDraw,
         CmdDrawIndexed,
-        CmdEndDrawPass,
+        CmdEndPaint,
         CmdCopyImage,
         CmdBlitImage,
         CmdCopyImageToBitmap,
         CmdCopyBitmapToImage
     };
 
-    struct CmdBeginDrawPassArgs
+    struct CmdBeginPaintArgs
     {
         DrawPass* drawPass;
-        RenderTarget* renderTarget;
+        Canvas* canvas;
         ColorRGBA clearValue;
     };
 
@@ -56,7 +56,7 @@ namespace kuas
 
         union
         {
-            CmdBeginDrawPassArgs    cmdBeginDrawPass;
+            CmdBeginPaintArgs       cmdBeginPaint;
             uint32_t                cmdSetPipeline;
             ViewportDesc            cmdSetViewport;
             Rect2I                  cmdSetScissorRect;
@@ -105,9 +105,9 @@ namespace kuas
         CommandList();
         ~CommandList();
 
-        void beginDrawPass(
+        void beginPaint(
             DrawPass* drawPass,
-            RenderTarget* renderTarget,
+            Canvas* canvas,
             const ColorRGBA* clearValue);
 
         void setViewport(const ViewportDesc& viewport);
@@ -129,7 +129,7 @@ namespace kuas
             uint32_t indexOffset,
             uint32_t vertexByteOffset);
 
-        void endDrawPass();
+        void endPaint();
 
         void reset();
 

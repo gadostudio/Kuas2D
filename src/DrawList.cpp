@@ -16,7 +16,7 @@ namespace kuas
         m_viewportUpdated(false),
         m_scissorRectUpdated(false),
         m_transformMatUpdated(true),
-        m_insideDrawPass(false),
+        m_isPainting(false),
         m_mappedIdxBuffer(nullptr),
         m_mappedVtxBuffer(nullptr),
         m_idxOffset(0),
@@ -37,11 +37,12 @@ namespace kuas
     {
     }
 
-    void DrawList::beginDrawPass(
-        DrawPass* drawPass, RenderTarget* renderTarget,
+    void DrawList::beginPaint(
+        DrawPass* drawPass,
+        Canvas* canvas,
         const ColorRGBA* clearValue)
     {
-        m_insideDrawPass = true;
+        m_isPainting = true;
     }
 
     void DrawList::setRenderState(RenderState* renderState)
@@ -325,12 +326,15 @@ namespace kuas
     {
     }
 
-    void DrawList::endDrawPass()
+    void DrawList::endPaint()
     {
-        m_insideDrawPass = false;
+        m_isPainting = false;
     }
 
     void DrawList::end()
     {
+        if (m_isPainting) {
+            endPaint();
+        }
     }
 }

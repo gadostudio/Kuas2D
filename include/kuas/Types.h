@@ -18,7 +18,7 @@ namespace kuas
     class Bitmap;
     class Image;
     class DrawPass;
-    class RenderTarget;
+    class Canvas;
     class RenderState;
     class DrawList;
     class Semaphore;
@@ -77,11 +77,11 @@ namespace kuas
     {
         enum
         {
-            Drawing             = 1 << 0,
-            RenderTargetOutput  = 1 << 1,
-            RenderTargetInput   = 1 << 2,
-            TransferSrc         = 1 << 3,
-            TransferDst         = 1 << 4
+            Drawing                 = 1 << 0,
+            CanvasOutputAttachment  = 1 << 1,
+            CanvasInputAttachment   = 1 << 2,
+            TransferSrc             = 1 << 3,
+            TransferDst             = 1 << 4
         };
     };
 

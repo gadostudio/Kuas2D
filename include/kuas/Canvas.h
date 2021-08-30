@@ -6,15 +6,15 @@
 
 namespace kuas
 {
-    class RenderTarget : public RefCount
+    class Canvas : public RefCount
     {
     public:
-        virtual ~RenderTarget() { }
+        virtual ~Canvas() { }
 
         virtual uint32_t getWidth() const = 0;
         virtual uint32_t getHeight() const = 0;
 
     protected:
-        RenderTarget() { }
+        Canvas() { }
     };
 }

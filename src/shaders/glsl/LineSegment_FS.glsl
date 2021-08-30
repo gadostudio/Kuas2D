@@ -12,7 +12,6 @@ void main()
 {
     o_col = gs_col;
 #ifdef KUAS_ANTIALIAS
-    const float sq2_2 = sqrt(2.) / 2.;
     float dy = length(vec2(dFdx(gs_pos.y), dFdy(gs_pos.y)));
     //float dy = fwidth(gs_pos.y);
     vec2 p = abs(gs_pos - gs_size);

@@ -15,12 +15,12 @@ namespace kuas
 
         void begin() override;
 
-        void beginDrawPass(
+        void beginPaint(
             DrawPass* drawPass,
-            RenderTarget* renderTarget,
+            Canvas* canvas,
             const ColorRGBA* clearValue) override;
 
-        void endDrawPass() override;
+        void endPaint() override;
 
         void blitImage(Image* srcImage, const Rect2F& srcRect, Image* dstImage, const Rect2F& dstRect) override;
         void copyImage() override;

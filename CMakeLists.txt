@@ -7,6 +7,8 @@ option(KUAS_BUILD_TESTS "Build test" OFF)
 add_subdirectory(extern)
 
 set(KUAS_VULKAN_BACKEND_SRC
+    "src/vk/CanvasVK.cpp"
+    "src/vk/CanvasVK.h"
     "src/vk/DeviceVK.cpp"
     "src/vk/DeviceVK.h"
     "src/vk/DrawListVK.cpp"
@@ -21,8 +23,6 @@ set(KUAS_VULKAN_BACKEND_SRC
     "src/vk/PipelineBuilderVK.h"
     "src/vk/RenderStateVK.h"
     "src/vk/RenderStateVK.cpp"
-    "src/vk/RenderTargetVK.cpp"
-    "src/vk/RenderTargetVK.h"
     "src/vk/SemaphoreVK.cpp"
     "src/vk/SemaphoreVK.h"
     "src/vk/SurfaceVK.cpp"
@@ -34,10 +34,6 @@ set(KUAS_VULKAN_BACKEND_SRC
     "src/vk/VulkanConvert.h"
     "src/vk/VulkanHeaders.h"
     "src/BackendFactoryVK.cpp")
-
-set(KUAS_SHADER_SRC
-    "src/shaders/BasicPolyFillNoAA_FS.h"
-    "src/shaders/BasicPolyFillNoAA_VS.h")
 
 set(KUAS_SRC
     "src/DrawList.cpp"

@@ -3,7 +3,7 @@
 #include <kuas/DebugAssert.h>
 
 #include "DrawPassVK.h"
-#include "RenderTargetVK.h"
+#include "CanvasVK.h"
 #include "RenderStateVK.h"
 #include "DrawListVK.h"
 #include "FenceVK.h"
@@ -124,8 +124,8 @@ namespace kuas
 
         static constexpr ImageUsageFlags viewRequiredFlags = 0
             | ImageUsage::Drawing
-            | ImageUsage::RenderTargetOutput
-            | ImageUsage::RenderTargetInput;
+            | ImageUsage::CanvasOutputAttachment
+            | ImageUsage::CanvasInputAttachment;
 
         VkImageView view = nullptr;
         
@@ -251,12 +251,12 @@ namespace kuas
         return Result::Ok;
     }
     
-    Result DeviceVK::createRenderTarget(
+    Result DeviceVK::createCanvas(
         DrawPass* drawPass,
         Image* imageBinding,
         uint32_t width,
         uint32_t height,
-        RenderTarget** renderTarget)
+        Canvas** canvas)
     {
         VkFramebuffer fb;
         VkFramebufferCreateInfo fbInfo{};
@@ -276,7 +276,7 @@ namespace kuas
             return Result::ErrOutOfMemory;
         }
 
-        *renderTarget = new RenderTargetVK(fb, width, height, this);
+        *canvas = new CanvasVK(fb, width, height, this);
 
         return Result::Ok;
     }

@@ -56,7 +56,7 @@ public:
             getDevice()->createDrawList(&drawLists[i]);
 
             drawLists[i]->begin();
-            drawLists[i]->beginDrawPass(getSurfaceDrawPass().get(), getSurfaceRenderTarget(i).get(), &color);
+            drawLists[i]->beginPaint(getSurfaceDrawPass().get(), getSurfaceCanvas(i).get(), &color);
             drawLists[i]->setRenderState(renderState.get());
             drawLists[i]->setViewport(viewport);
             drawLists[i]->setScissorRect(scissor);
@@ -76,7 +76,7 @@ public:
                 drawLists[i]->drawLine(kuas::Vec2F(200.0f + f, 180.0f), kuas::Vec2F(220.0f + f, 20.0f));
             }
 
-            drawLists[i]->endDrawPass();
+            drawLists[i]->endPaint();
             drawLists[i]->end();
         }
     }

@@ -26,12 +26,12 @@ namespace kuas
         
         Result createRenderState(DrawPass* drawPass, const RenderStateCreateDesc& desc, RenderState** renderState) override;
         
-        Result createRenderTarget(
+        Result createCanvas(
             DrawPass* drawPass,
             Image* imageBinding,
             uint32_t width,
             uint32_t height,
-            RenderTarget** renderTarget) override;
+            Canvas** canvas) override;
 
         Result createPathBuffer() override;
         Result createDrawList(DrawList** drawList) override;

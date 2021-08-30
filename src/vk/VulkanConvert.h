@@ -42,11 +42,11 @@ namespace kuas
             ret |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
 
-        if ((usage & ImageUsage::RenderTargetOutput) == ImageUsage::RenderTargetOutput) {
+        if ((usage & ImageUsage::CanvasOutputAttachment) == ImageUsage::CanvasOutputAttachment) {
             ret |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         }
 
-        if ((usage & ImageUsage::RenderTargetInput) == ImageUsage::RenderTargetInput) {
+        if ((usage & ImageUsage::CanvasInputAttachment) == ImageUsage::CanvasInputAttachment) {
             ret |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
         }
 

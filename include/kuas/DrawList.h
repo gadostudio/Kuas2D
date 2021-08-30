@@ -3,7 +3,7 @@
 #include "Types.h"
 #include "Image.h"
 #include "DrawPass.h"
-#include "RenderTarget.h"
+#include "Canvas.h"
 #include "math/Vec2.h"
 #include "math/Mat3.h"
 #include "math/ColorRGBA.h"
@@ -19,9 +19,9 @@ namespace kuas
 
         virtual void begin();
         
-        virtual void beginDrawPass(
+        virtual void beginPaint(
             DrawPass* drawPass,
-            RenderTarget* renderTarget,
+            Canvas* canvas,
             const ColorRGBA* clearValue);
 
         void setRenderState(RenderState* renderState);
@@ -62,7 +62,7 @@ namespace kuas
         void fillEllipticArc(float cx, float cy, float startAngle, float endAngle, float rx, float ry);
         void fillEllipticPie(const Vec2F& centerPos, float startAngle, float endAngle, float rx, float ry);
         void fillEllipticPie(float cx, float cy, float startAngle, float endAngle, float rx, float ry);
-        virtual void endDrawPass();
+        virtual void endPaint();
         virtual void blitImage(Image* srcImage, const Rect2F& srcRect, Image* dstImage, const Rect2F& dstRect) = 0;
         virtual void copyImage() = 0;
         virtual void copyBitmapToImage() = 0;
@@ -81,7 +81,7 @@ namespace kuas
         bool            m_viewportUpdated;
         bool            m_scissorRectUpdated;
         bool            m_transformMatUpdated;
-        bool            m_insideDrawPass;
+        bool            m_isPainting;
         
         void*           m_mappedIdxBuffer;
         void*           m_mappedVtxBuffer;

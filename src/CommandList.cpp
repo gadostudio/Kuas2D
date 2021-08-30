@@ -16,26 +16,26 @@ namespace kuas
         std::free(m_cmdList);
     }
 
-    void CommandList::beginDrawPass(DrawPass* drawPass, RenderTarget* renderTarget, const ColorRGBA* clearValue)
+    void CommandList::beginPaint(DrawPass* drawPass, Canvas* canvas, const ColorRGBA* clearValue)
     {
         reserveCommand();
 
         CommandData& cmd = m_cmdList[m_currentCmd++];
-        cmd.type = CommandType::CmdBeginDrawPass;
-        cmd.cmdBeginDrawPass.drawPass = drawPass;
-        cmd.cmdBeginDrawPass.renderTarget = renderTarget;
+        cmd.type = CommandType::CmdBeginPaint;
+        cmd.cmdBeginPaint.drawPass = drawPass;
+        cmd.cmdBeginPaint.canvas = canvas;
 
         if (clearValue != nullptr) {
-            cmd.cmdBeginDrawPass.clearValue.r = clearValue->r;
-            cmd.cmdBeginDrawPass.clearValue.g = clearValue->g;
-            cmd.cmdBeginDrawPass.clearValue.b = clearValue->b;
-            cmd.cmdBeginDrawPass.clearValue.a = clearValue->a;
+            cmd.cmdBeginPaint.clearValue.r = clearValue->r;
+            cmd.cmdBeginPaint.clearValue.g = clearValue->g;
+            cmd.cmdBeginPaint.clearValue.b = clearValue->b;
+            cmd.cmdBeginPaint.clearValue.a = clearValue->a;
         }
         else {
-            cmd.cmdBeginDrawPass.clearValue.r = 0.0f;
-            cmd.cmdBeginDrawPass.clearValue.g = 0.0f;
-            cmd.cmdBeginDrawPass.clearValue.b = 0.0f;
-            cmd.cmdBeginDrawPass.clearValue.a = 1.0f;
+            cmd.cmdBeginPaint.clearValue.r = 0.0f;
+            cmd.cmdBeginPaint.clearValue.g = 0.0f;
+            cmd.cmdBeginPaint.clearValue.b = 0.0f;
+            cmd.cmdBeginPaint.clearValue.a = 1.0f;
         }
     }
 
@@ -100,12 +100,12 @@ namespace kuas
         cmd.cmdDrawIndexed.vertexByteOffset = vertexByteOffset;
     }
 
-    void CommandList::endDrawPass()
+    void CommandList::endPaint()
     {
         reserveCommand();
 
         CommandData& cmd = m_cmdList[m_currentCmd++];
-        cmd.type = CommandType::CmdEndDrawPass;
+        cmd.type = CommandType::CmdEndPaint;
     }
 
     void CommandList::reset()

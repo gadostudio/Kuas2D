@@ -35,7 +35,7 @@ namespace ks_app
         surfDesc.numSwapBuffer = 2;
         surfDesc.width = x;
         surfDesc.height = y;
-        surfDesc.usage = kuas::ImageUsage::RenderTargetOutput;
+        surfDesc.usage = kuas::ImageUsage::CanvasOutputAttachment;
         surfDesc.data0 = (void*)m_window;
 
         m_device->createSurface(surfDesc, &m_surface);
@@ -51,9 +51,9 @@ namespace ks_app
             FrameData& frameData = m_frameData[i];
 
             kuas::Image* img = m_surface->getImage(i);
-            frameData.renderTargetImage.reset(kuas::safeAddRef(img));
+            frameData.surfaceImage.reset(kuas::safeAddRef(img));
 
-            m_device->createRenderTarget(m_drawPass.get(), frameData.renderTargetImage.get(), x, y, &frameData.renderTarget);
+            m_device->createCanvas(m_drawPass.get(), frameData.surfaceImage.get(), x, y, &frameData.canvas);
             m_device->createSemaphore(&frameData.renderFinishedSemaphore);
         }
     }
