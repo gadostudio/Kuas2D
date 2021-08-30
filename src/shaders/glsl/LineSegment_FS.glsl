@@ -16,16 +16,28 @@ void main()
     //float dy = fwidth(gs_pos.y);
     vec2 p = abs(gs_pos - gs_size);
     float d = 0;
+#ifdef KUAS_ROUND_CAPPED_LINE
+    float r = gs_size.y;
+#else
+    float r = 0.5;
+#endif
     
     // we split into two cases to avoid very thin line caused by partial derivative.
-    if (p.x < (gs_size.x - 0.5)) {
+    if (p.x < (gs_size.x - r)) {
         d = p.y - gs_size.y - 0.5;
         d = d / dy + 0.5;
     }
     else {
+#ifdef KUAS_ROUND_CAPPED_LINE
+        p.x -= gs_size.x - r;
+        d = length(p) - r;
+#else
         p -= gs_size;
-        d = max(p.x, p.y) - 0.5;
-        d = d / fwidth(d) + 0.5;
+        d = max(p.x, p.y);
+#endif
+        float ddf = length(vec2(dFdx(d), dFdy(d)));
+        d -= 0.5;
+        d = d / ddf + 0.5;
     }
 
     o_col.a *= 1 - clamp(d, 0, 1);

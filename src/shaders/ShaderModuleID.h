@@ -56,6 +56,8 @@ namespace kuas
             LineSegment_FS,
             LineSegmentAA_GS,
             LineSegmentAA_FS,
+            LineSegmentCappedAA_GS,
+            LineSegmentRoundedAA_FS,
 
             Count
         };

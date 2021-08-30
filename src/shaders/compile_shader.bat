@@ -60,3 +60,6 @@ glslangValidator --target-env vulkan1.0 -S frag --vn ShaderLineSegment_FS -o Lin
 
 glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS --vn ShaderLineSegmentAA_GS -o LineSegmentAA_GS.h glsl/LineSegment_GS.glsl
 glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS --vn ShaderLineSegmentAA_FS -o LineSegmentAA_FS.h glsl/LineSegment_FS.glsl
+
+glslangValidator --target-env vulkan1.0 -S geom -DKUAS_ANTIALIAS -DKUAS_CAPPED_LINE --vn ShaderLineSegmentCappedAA_GS -o LineSegmentCappedAA_GS.h glsl/LineSegment_GS.glsl
+glslangValidator --target-env vulkan1.0 -S frag -DKUAS_ANTIALIAS -DKUAS_ROUND_CAPPED_LINE --vn ShaderLineSegmentRoundedAA_FS -o LineSegmentRoundedAA_FS.h glsl/LineSegment_FS.glsl

@@ -34,8 +34,14 @@ void main()
     vec2 t = normalize(d);
     vec2 o = w_a * vec2(-t.y, t.x);
 
-#ifdef KUAS_ANTIALIAS
+#ifdef KUAS_CAPPED_LINE
+    t *= w_a;
+    float ld = length(d + 2.0 * t);
+#else
     float ld = length(d);
+#endif
+
+#ifdef KUAS_ANTIALIAS
     vec2 halfsize = (vec2(ld, w) * 0.5) - 0.5;
     // transform edges
     vec3 e0 = transform * vec3(a - o - t, 1.0);

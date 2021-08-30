@@ -318,7 +318,6 @@ namespace kuas
     VkPipeline PipelineBuilderVK::buildLineSegment()
     {
         VkPipelineLayout layout = m_device->getCommonPipelineLayout();
-        bool antialias = m_renderState.rasterizationState->antiAliasedLine;
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
         inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -350,10 +349,31 @@ namespace kuas
         colorBlendInfo.attachmentCount = 1;
         colorBlendInfo.pAttachments = &blendAtt;
 
+        bool antialias = m_renderState.rasterizationState->antiAliasedLine;
+        LineCap capMode = m_renderState.rasterizationState->lineCap;
+        uint32_t gsModule = 0;
+        uint32_t fsModule = 0;
+
+        assert(antialias);
+        switch (capMode) {
+            case LineCap::None:
+                gsModule = ShaderModuleID::LineSegmentAA_GS;
+                fsModule = ShaderModuleID::LineSegmentAA_FS;
+                break;
+            case LineCap::Rounded:
+                gsModule = ShaderModuleID::LineSegmentCappedAA_GS;
+                fsModule = ShaderModuleID::LineSegmentRoundedAA_FS;
+                break;
+            case LineCap::Square:
+                gsModule = ShaderModuleID::LineSegmentCappedAA_GS;
+                fsModule = ShaderModuleID::LineSegmentAA_FS;
+                break;
+        }
+
         return buildPipeline(
             m_device->getShaderModule(ShaderModuleID::LineSegment_VS),
-            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegmentAA_GS : ShaderModuleID::LineSegment_GS),
-            m_device->getShaderModule(antialias ? ShaderModuleID::LineSegmentAA_FS : ShaderModuleID::LineSegment_FS),
+            m_device->getShaderModule(gsModule),
+            m_device->getShaderModule(fsModule),
             layout,
             inputAssemblyInfo,
             vertexInputInfo,
